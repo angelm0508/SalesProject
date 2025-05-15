@@ -1,23 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
     public class SaleRepository : IGenericRepository<Sale>
     {
-        private readonly FerreteriaDbContext _context;
-        public SaleRepository(FerreteriaDbContext context)
+        private readonly ApiDbContext _context;
+        public SaleRepository(ApiDbContext context)
         {
             _context = context;
         }
-
+        #region 
         public async Task<bool> InsertAsync(Sale obj)
         {
             obj.DateTrans = DateTime.Parse(obj.DateTrans.ToString("yyyy-MM-dd"));
@@ -25,7 +19,26 @@ namespace SalesProject.Infraestructure.Repository
 
             string detailIntoString = BuildSaleDetailString(obj.SaleDets);
 
-            var insert = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_insert_sale @documentId={obj.DocumentId}, @customerId={obj.CustomerId}, @userId={obj.UserId}, @transStateId = {obj.TransStateId}, @saleOrderId={obj.SaleOrderId}, @noDoc={obj.NoDoc}, @noSerie={obj.Serie}, @credit={obj.Credit}, @credit_days={obj.CreditDays}, @date={obj.Date}, @dateTrans={obj.DateTrans}, @subtotal={obj.Subtotal}, @iva={obj.Iva}, @total={obj.Total}, @detail={detailIntoString};").ToListAsync();
+            var insert = await _context.SPCRUDs
+                                        .FromSqlInterpolated($@"
+                                            EXEC sp_insert_sale 
+                                            @customerCode= '{obj.CustomerCode}',
+                                            @documentId= {obj.DocumentId},
+                                            @userCode= '{obj.UserCode}',
+                                            @saleOrderId= {obj.SaleOrderId},
+                                            @transStateId= {obj.TransStateId},
+                                            @noDoc= {obj.NoDoc},
+                                            @noSerie= '{obj.Serie}',
+                                            @credit= {obj.Credit},
+                                            @credit_days= {obj.CreditDays},
+                                            @date= {obj.Date},
+                                            @dateTrans= {obj.DateTrans},
+                                            @subtotal= {obj.SubTotal},
+                                            @iva= {obj.Iva}, 
+                                            @total= {obj.Total}, 
+                                            @detail = '{detailIntoString}' "
+                                        )
+                                        .ToListAsync();
 
             if (!string.IsNullOrEmpty(insert[0].ErrorMessage))
                 throw new Exception(insert[0].ErrorMessage);
@@ -34,39 +47,46 @@ namespace SalesProject.Infraestructure.Repository
         }
         public async Task<bool> UpdateAsync(int id, Sale obj)
         {
-            obj.DateTrans = DateTime.Parse(obj.DateTrans.ToString("yyyy-MM-dd"));
+            var sale = await _context.Sales.SingleOrDefaultAsync(x => x.Id == id);
 
-            string detailIntoString = BuildSaleDetailString(obj.SaleDets);
+            sale.DateTrans = obj.DateTrans;
+            sale.Credit = obj.Credit;
+            sale.CreditDays = obj.CreditDays;
 
-            var update = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_update_sale @id={id},@customerId={obj.CustomerId}, @userId={obj.UserId}, @transStateId={obj.TransStateId}, @noDoc = {obj.NoDoc}, @noSerie = {obj.Serie}, @credit={obj.Credit}, @credit_days={obj.CreditDays}, @dateTrans={obj.DateTrans}, @subtotal={obj.Subtotal}, @iva={obj.Iva},@total={obj.Total}, @detail = {detailIntoString};").ToListAsync();
+            int save = await _context.SaveChangesAsync();
 
-            if (!string.IsNullOrEmpty(update[0].ErrorMessage))
-                throw new Exception(update[0].ErrorMessage);
-
-            return true;
+            return save > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
-            var delete = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_delete_sale {id};").ToListAsync();
+            var cancel = await _context.SPCRUDs
+                                       .FromSqlInterpolated($@"
+                                            EXEC sp_cancel_sale 
+                                            @id = {id}"
+                                       )
+                                       .ToListAsync();
 
-            if (!string.IsNullOrEmpty(delete[0].ErrorMessage))
-                throw new Exception(delete[0].ErrorMessage);
+            if (!string.IsNullOrEmpty(cancel[0].ErrorMessage))
+                throw new Exception(cancel[0].ErrorMessage);
 
             return true;
         }
         public async Task<Sale> GetByIdAsync(int id)
         {
-            var sale = await _context.Sales.Include(x => x.Document)
-                .Include(x => x.Customer)
-                .Include(x => x.SaleDets)
-                .FirstOrDefaultAsync(x => x.Id == id);
-            return sale;
+            return await _context.Sales.Include(x => x.TransState)
+                                           .Include(x => x.Document)
+                                           .Include(x => x.CustomerCodeNavigation)
+                                           .Include(x => x.UserCodeNavigation)
+                                           .Include(x => x.SaleDets)
+                                           .FirstOrDefaultAsync(x => x.Id == id);
         }
         public async Task<IQueryable<Sale>> GetAllAsync()
         {
-            IQueryable<Sale> queryable =  _context.Sales.Include(x => x.Document)
-                                            .Include(x => x.Customer);
-            return queryable;
+            return  _context.Sales.Include(x => x.TransState)
+                                    .Include(x => x.Document)
+                                    .Include(x => x.CustomerCodeNavigation)
+                                    .Include(x => x.UserCodeNavigation)
+                                    .Include(x => x.SaleDets);
         }
 
         #region metodos propios
@@ -75,9 +95,9 @@ namespace SalesProject.Infraestructure.Repository
             string detailIntoString = "";
             for (int i = 0; i < detail.Count(); i++)
             {
-                detailIntoString += $"{detail.ElementAt(i).ProductId}, {detail.ElementAt(i).CellarId}," +
-                                $"{detail.ElementAt(i).Price}, {detail.ElementAt(i).Units}," +
-                                $"{detail.ElementAt(i).Discount}, {detail.ElementAt(i).SubTotal}";
+                detailIntoString += $"{detail.ElementAt(i).ProductSku},{detail.ElementAt(i).Name}," +
+                                $"{detail.ElementAt(i).Price},{detail.ElementAt(i).Units}," +
+                                $"{detail.ElementAt(i).Discount},{detail.ElementAt(i).SubTotal},{detail.ElementAt(i).CellarCode}";
 
                 detailIntoString += ((detail.Count() > 1) && (i < detail.Count() - 1)) ? "|" : "";
             }
@@ -86,5 +106,6 @@ namespace SalesProject.Infraestructure.Repository
         }
         #endregion
 
+        #endregion
     }
 }

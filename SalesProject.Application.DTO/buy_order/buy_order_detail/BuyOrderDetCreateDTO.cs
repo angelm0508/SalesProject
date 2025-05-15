@@ -1,20 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.buy_order.buy_order_detail
 {
     public class BuyOrderDetCreateDTO
     {
-        public int CellarId { get; set; }
-        public int ProductId { get; set; }
-        public string Sku { get; set;  }
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public string CellarCode { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public string ProductSku { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public string Name { get; set; }
-        public decimal Price { get; set; }
-        public int Units { get; set; }
-        public decimal Discount { get; set; }
-        public decimal Subtotal { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double Price { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double Units { get; set; }
+
+        public double Discount { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double SubTotal { get; set; }
     }
 }

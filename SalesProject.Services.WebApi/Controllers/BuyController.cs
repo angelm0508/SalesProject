@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SalesProject.Application.DTO.buy.buy;
 using SalesProject.Application.DTO.pagination;
@@ -105,8 +106,8 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute]int id)
+        [HttpGet("cancel/{id:int}")]
+        public async Task<ActionResult> Cancel([FromRoute]int id)
         {
             var buy = await _buyApplication.GetByIdAsync(id);
 

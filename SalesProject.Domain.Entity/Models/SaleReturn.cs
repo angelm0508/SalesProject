@@ -9,17 +9,17 @@ public partial class SaleReturn
 
     public int DocumentId { get; set; }
 
-    public int CustomerId { get; set; }
+    public string CustomerCode { get; set; }
 
-    public int UserId { get; set; }
+    public string UserCode { get; set; }
 
     public int TransStateId { get; set; }
 
-    public string NoDoc { get; set; }
+    public int NoDoc { get; set; }
 
     public string Serie { get; set; }
 
-    public bool? Credit { get; set; }
+    public bool Credit { get; set; }
 
     public DateTime DateTrans { get; set; }
 
@@ -27,19 +27,23 @@ public partial class SaleReturn
 
     public string Observation { get; set; }
 
-    public decimal? Subtotal { get; set; }
+    public decimal SubTotal { get; set; }
 
-    public decimal? Iva { get; set; }
+    public decimal Iva { get; set; }
 
     public decimal Total { get; set; }
 
-    public virtual Customer Customer { get; set; }
+    public virtual ICollection<BatchTransaction> BatchTransactions { get; } = new List<BatchTransaction>();
+
+    public virtual Customer CustomerCodeNavigation { get; set; }
 
     public virtual Document Document { get; set; }
 
     public virtual ICollection<SaleReturnDet> SaleReturnDets { get; } = new List<SaleReturnDet>();
 
+    public virtual TransactionState TransState { get; set; }
+
     public virtual ICollection<TransactionDetail> TransactionDetails { get; } = new List<TransactionDetail>();
 
-    public virtual UserSy User { get; set; }
+    public virtual UserSy UserCodeNavigation { get; set; }
 }

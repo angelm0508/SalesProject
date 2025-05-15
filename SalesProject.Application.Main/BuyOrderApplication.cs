@@ -20,7 +20,7 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
-
+ 
         #region async methods
         public async Task<Response<bool>> InsertAsync(BuyOrderCreateDTO obj)
         {
@@ -29,6 +29,7 @@ namespace SalesProject.Application.Main
             {
                 var buyOrder = _mapper.Map<BuyOrder>(obj);
                 response.Data = await _buyOrderDomain.InsertAsync(buyOrder);
+
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -60,16 +61,16 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> CancelAsync(int id)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _buyOrderDomain.DeleteAsync(id);
+                response.Data = await _buyOrderDomain.CancelAsync(id);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
-                    response.Message = "Register deleted successfully";
+                    response.Message = "Register canceled successfully";
                 }
             }
             catch (Exception ex)
@@ -141,7 +142,7 @@ namespace SalesProject.Application.Main
                 var buyOrder = await _buyOrderDomain.GetByIdAsync(id);
 
                 var buy = _mapper.Map<Buy>(buyOrder);
-                //buy.BuyDets = _mapper.Map<ICollection<BuyDet>>(buyOrder.BuyOrderDets);
+                buy.BuyDets = _mapper.Map<ICollection<BuyDet>>(buyOrder.BuyOrderDets);
 
                 buy.BuyOrderId = id;
                 buy.DocumentId = buyOrder.OutputDocumentId;
@@ -160,9 +161,6 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-
-        
-
         #endregion
     }
 }

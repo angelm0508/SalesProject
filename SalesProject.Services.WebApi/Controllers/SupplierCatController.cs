@@ -45,7 +45,7 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (supplierCat.Data == null)
             {
-                return NotFound(new ResponseError($"The supplier category id was not found."));
+                return NotFound(new ResponseError($"The supplier category name was not found."));
             }
 
             return Ok(supplierCat.Data);
@@ -95,7 +95,7 @@ namespace SalesProject.Services.WebApi.Controllers
         {
             var supplierCat = await _supplierCatApplication.GetByIdAsync(id);
 
-            if (supplierCat == null)
+            if (supplierCat.Data == null)
             {
                 return NotFound(new ResponseError("The supplier category id was not found."));
             }
@@ -115,7 +115,7 @@ namespace SalesProject.Services.WebApi.Controllers
         {
             var supplierCat = await _supplierCatApplication.GetByIdAsync(id);
 
-            if (supplierCat == null)
+            if (supplierCat.Data == null)
             {
                 return NotFound(new ResponseError("The supplier category id was not found."));
             }

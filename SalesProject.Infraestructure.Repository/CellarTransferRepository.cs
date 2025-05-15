@@ -1,20 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class CellarTransferRepository : IGenericRepository<CellarTransfer>
+    public class CellarTransferRepository : IGenericRepositoryThree<CellarTransfer>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public CellarTransferRepository(FerreteriaDbContext context)
+        public CellarTransferRepository(ApiDbContext context)
         {
             _context = context;
         }
@@ -26,7 +20,7 @@ namespace SalesProject.Infraestructure.Repository
 
             string stringDetail = BuildTransferDetailString(obj.CellarTransferDets);
 
-            var insert = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_insert_cellar_trans @documentId={obj.DocumentId},@userId={obj.UserId},@noTransfer={obj.NoTransfer}, @dateTrans={obj.DateTrans}, @date={obj.DateTrans},@observation={obj.Observation}, @detail={stringDetail};").ToListAsync();
+            var insert = await _context.SPCRUDs.FromSqlInterpolated($"").ToListAsync();
 
             if (!string.IsNullOrEmpty(insert[0].ErrorMessage))
             {
@@ -41,7 +35,7 @@ namespace SalesProject.Infraestructure.Repository
 
             string stringDetail = BuildTransferDetailString(obj.CellarTransferDets);
 
-            var update = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_update_cellar_trans @id={id},@userId={obj.UserId},@noTransfer={obj.NoTransfer}, @dateTrans={obj.DateTrans},@date={obj.Date},@observation={obj.Observation}, @detail={stringDetail};").ToListAsync();
+            var update = await _context.SPCRUDs.FromSqlInterpolated($"").ToListAsync();
 
             if (!string.IsNullOrEmpty(update[0].ErrorMessage))
             {
@@ -62,33 +56,32 @@ namespace SalesProject.Infraestructure.Repository
             return true;
         }
 
-        public async Task<IQueryable<CellarTransfer>> GetAllAsync()
-        {
-            IQueryable<CellarTransfer> queryable = _context.CellarTransfers.Include(x => x.CellarTransferDets);
-            return queryable;
-        }
-
         public async Task<CellarTransfer> GetByIdAsync(int id)
         {
             return await _context.CellarTransfers.Include(x => x.CellarTransferDets)
                             .FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<IQueryable<CellarTransfer>> GetAllAsync()
+        {
+            return _context.CellarTransfers.Include(x => x.CellarTransferDets);
+        }
+
+        #region aditional methods
         private string BuildTransferDetailString(ICollection<CellarTransferDet> detail)
         {
             string stringDetail = "";
 
             for (int i=0; i<detail.Count; i++)
             {
-                stringDetail += $"{detail.ElementAt(i).ProductId}, {detail.ElementAt(i).CellarOriginId}," +
-                    $"{detail.ElementAt(i).CellarDestinationId}, {detail.ElementAt(i).Units}";
+                stringDetail += $"{detail.ElementAt(i).ProductSku}, {detail.ElementAt(i).CellarOriginCode}," +
+                    $"{detail.ElementAt(i).CellarDestinationCode}, {detail.ElementAt(i).Quantity}";
 
                 stringDetail += ((detail.Count() > 1) && (i < detail.Count() - 1)) ? "|" : "";
             }
 
             return stringDetail;
         }
-
-        
+        #endregion
     }
 }

@@ -1,19 +1,15 @@
 ﻿using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Domain.Core
 {
     public class DocumentTypeDomain : IDocumentTypeDomain
     {
-        private readonly IGenericRepository<DocumentType> _genericDocumentTypeRepo;
 
-        public DocumentTypeDomain(IGenericRepository<DocumentType> genericRepository)
+        private readonly IGenericRepositoryThree<DocumentType> _genericDocumentTypeRepo;
+
+        public DocumentTypeDomain(IGenericRepositoryThree<DocumentType> genericRepository)
         {
             _genericDocumentTypeRepo= genericRepository;
         }

@@ -5,11 +5,6 @@ using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -23,7 +18,7 @@ namespace SalesProject.Application.Main
             _saleDomain= saleDomain;
             _mapper = mapper;
         }
-
+        
         #region async methods
         public async Task<Response<bool>> InsertAsync(SaleCreateDTO obj)
         {
@@ -63,17 +58,17 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> CancelAsync(int id)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _saleDomain.DeleteAsync(id);
+                response.Data = await _saleDomain.CancelAsync(id);
 
                 if (response.Data)
                 {
                     response.IsSuccess = true;
-                    response.Message = "Register deleted successfully.";
+                    response.Message = "Register canceled successfully.";
                 }
             }
             catch (Exception ex)

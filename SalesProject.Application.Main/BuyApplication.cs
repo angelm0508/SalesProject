@@ -28,6 +28,7 @@ namespace SalesProject.Application.Main
             {
                 var buy = _mapper.Map<Buy>(obj);
                 response.Data = await _buyDomain.InsertAsync(buy);
+
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -47,6 +48,7 @@ namespace SalesProject.Application.Main
             {
                 var buy = _mapper.Map<Buy>(obj);
                 response.Data = await _buyDomain.UpdateAsync(id, buy);
+
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -64,7 +66,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                response.Data = await _buyDomain.DeleteAsync(id);
+                response.Data = await _buyDomain.CancelAsync(id);
                 if (response.Data)
                 {
                     response.IsSuccess = true;

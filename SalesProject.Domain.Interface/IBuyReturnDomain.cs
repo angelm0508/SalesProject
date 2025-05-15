@@ -1,9 +1,4 @@
 ﻿using SalesProject.Domain.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Domain.Interface
 {
@@ -12,12 +7,15 @@ namespace SalesProject.Domain.Interface
         #region async methods
         Task<bool> InsertAsync(BuyReturn obj);
         Task<bool> UpdateAsync(int id, BuyReturn obj);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> CancelAsync(int id);
         Task<BuyReturn> GetByIdAsync(int id);
         Task<IQueryable<BuyReturn>> GetAllAsync();
         Task<IQueryable<BuyReturn>> GetAllWithPagingAsync();
+        #region validations
         Task<bool> IsABuyReturnDocument(int id);
         Task<bool> RegisterExists(BuyReturn obj);
+        Task<bool> IsCanceled(int id);
+        #endregion
         #endregion
     }
 }

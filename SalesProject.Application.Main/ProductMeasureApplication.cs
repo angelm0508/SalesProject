@@ -19,13 +19,13 @@ namespace SalesProject.Application.Main
             _productMeasureDomain = productMeasureDomain;
             _mapper = mapper;
         }
-
+        #region async methods
         public async Task<Response<bool>> InsertAsync(ProductMeasureCreateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
-                var measure = _mapper.Map<Measure>(obj);
+                var measure = _mapper.Map<ProductMeasure>(obj);
                 response.Data = await _productMeasureDomain.InsertAsync(measure);
                 if (response.Data)
                 {
@@ -46,7 +46,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var measure = _mapper.Map<Measure>(obj);
+                var measure = _mapper.Map<ProductMeasure>(obj);
                 response.Data = await _productMeasureDomain.UpdateAsync(id, measure);
                 if (response.Data)
                 {
@@ -72,6 +72,24 @@ namespace SalesProject.Application.Main
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"{ex.Message} \n {ex.InnerException}";
+            }
+
+            return response;
+        }
+
+        public async Task<Response<ProductMeasureDTO>> GetByIdAsync(int id)
+        {
+            var response = new Response<ProductMeasureDTO>();
+            try
+            {
+                var measure = await _productMeasureDomain.GetByIdAsync(id);
+                response.Data = _mapper.Map<ProductMeasureDTO>(measure);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -136,25 +154,6 @@ namespace SalesProject.Application.Main
 
             return response;
         }
-
-        public async Task<Response<ProductMeasureDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<ProductMeasureDTO>();
-            try
-            {
-                var measure = await _productMeasureDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<ProductMeasureDTO>(measure);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"{ex.Message} \n {ex.InnerException}";
-            }
-
-            return response;
-        }
-
-        
+        #endregion
     }
 }

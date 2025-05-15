@@ -1,17 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using SalesProject.Application.DTO.buy_order.buy_order;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.DTO.sale_order.sale_order;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -25,7 +18,7 @@ namespace SalesProject.Application.Main
             _saleOrderDomain = saleOrderDomain;
             _mapper = mapper;
         }
-
+        
         #region async methods
         public async Task<Response<bool>> InsertAsync(SaleOrderCreateDTO obj)
         {
@@ -42,7 +35,7 @@ namespace SalesProject.Application.Main
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
+                response.Message = $"{ex.Message} / {ex.InnerException}";
             }
             return response;
         }
@@ -66,16 +59,16 @@ namespace SalesProject.Application.Main
             return response;
         }
 
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> CancelAsync(int id)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _saleOrderDomain.DeleteAsync(id);
+                response.Data = await _saleOrderDomain.CancelAsync(id);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
-                    response.Message = "Register deleted succesfully.";
+                    response.Message = "Register canceled succesfully.";
                 }
             }
             catch (Exception ex)

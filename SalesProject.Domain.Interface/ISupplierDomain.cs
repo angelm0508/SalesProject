@@ -1,9 +1,4 @@
 ﻿using SalesProject.Domain.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Domain.Interface
 {
@@ -11,15 +6,18 @@ namespace SalesProject.Domain.Interface
     {
         #region async methods
         Task<bool> InsertAsync(Supplier obj);
-        Task<bool> UpdateAsync(int id, Supplier obj);
-        Task<bool> DeleteAsync(int id);
-        Task<Supplier> GetByIdAsync(int id);
+        Task<bool> UpdateAsync(string code, Supplier obj);
+        Task<bool> DeleteAsync(string code);
+        Task<Supplier> GetByCodeAsync(string code);
         Task<Supplier> GetByNameAsync(string name);
-        Task<IEnumerable<Supplier>> GetAllTthatContainsNameAsync(string name);
-        Task<IEnumerable<Supplier>> GetAllThatContainsNitAsync(string nit);
         Task<IQueryable<Supplier>> GetAllAsync();
         Task<IQueryable<Supplier>> GetAllWithPagingAsync();
-        Task<bool> RegisterExists(Supplier obj);
+        Task<IEnumerable<Supplier>> GetAllTthatContainsNameAsync(string name);
+        Task<IEnumerable<Supplier>> GetAllThatContainsNitAsync(string nit);
+
+        #region validations
+        Task<bool> ExistSupplier(string code);
+        #endregion
         #endregion
     }
 }

@@ -1,64 +1,57 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class ProductMeasureRepository : IGenericRepository<Measure>
+    public class ProductMeasureRepository : IGenericRepositoryThree<ProductMeasure>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public ProductMeasureRepository(FerreteriaDbContext context)
+        public ProductMeasureRepository(ApiDbContext context)
         {
             _context = context;
         }
-
-        public async Task<bool> InsertAsync(Measure obj)
+        #region async methods
+        public async Task<bool> InsertAsync(ProductMeasure obj)
         {
-            var insert = await _context.Measures.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.ProductMeasures.AddAsync(obj);
+            int insert = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return insert > 0;
         }
 
-        public async Task<bool> UpdateAsync(int id, Measure obj)
+        public async Task<bool> UpdateAsync(int id, ProductMeasure obj)
         {
-            var measure = await _context.Measures.SingleAsync(x => x.Id == id);
+            var measure = await _context.ProductMeasures.SingleAsync(x => x.Id == id);
 
             measure.Name = obj.Name;
 
-            var update = _context.Measures.Update(measure);
-            await _context.SaveChangesAsync();
+            _context.ProductMeasures.Update(measure);
+            int update = await _context.SaveChangesAsync();
 
-            return update != null;  
+            return update > 0;  
         }
         public async Task<bool> DeleteAsync(int id)
         {
-            var measure = await _context.Measures.SingleAsync(x => x.Id == id);
+            var measure = await _context.ProductMeasures.SingleAsync(x => x.Id == id);
 
-            var delete = _context.Measures.Remove(measure);
-            await _context.SaveChangesAsync();
+            _context.ProductMeasures.Remove(measure);
+            int delete = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return delete > 0;
         }
 
-        public async Task<IQueryable<Measure>> GetAllAsync()
+        public async Task<ProductMeasure> GetByIdAsync(int id)
         {
-            IQueryable<Measure> queryable = _context.Measures;
-            return queryable;
+            return await _context.ProductMeasures.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Measure> GetByIdAsync(int id)
+        public async Task<IQueryable<ProductMeasure>> GetAllAsync()
         {
-            var measure = await _context.Measures.FirstOrDefaultAsync(x => x.Id == id);
-            return measure;
+            return _context.ProductMeasures;
         }
+        #endregion
 
-        
     }
 }

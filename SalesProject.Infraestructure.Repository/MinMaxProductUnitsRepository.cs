@@ -1,63 +1,57 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class MinMaxProductUnitsRepository : IGenericRepository<MinMaxProd>
+    public class MinMaxProductUnitsRepository : IGenericRepositoryThree<MinMaxProduct>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public MinMaxProductUnitsRepository(FerreteriaDbContext context)
+        public MinMaxProductUnitsRepository(ApiDbContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> InsertAsync(MinMaxProd obj)
+        public async Task<bool> InsertAsync(MinMaxProduct obj)
         {
-            var insert = await _context.MinMaxProds.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.MinMaxProducts.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return inserted > 0;
         }
 
-        public async Task<bool> UpdateAsync(int id, MinMaxProd obj)
+        public async Task<bool> UpdateAsync(int id, MinMaxProduct obj)
         {
-            var minMaxProductUnits = await _context.MinMaxProds.SingleAsync(x => x.Id == id);
+            var minMaxProductUnits = await _context.MinMaxProducts.SingleAsync(x => x.Id == id);
 
-            minMaxProductUnits.ProductId = obj.ProductId;
-            minMaxProductUnits.CellarId = obj.CellarId;
+            // minMaxProductUnits.ProductSku = obj.ProductSku;
+            minMaxProductUnits.CellarCode = obj.CellarCode;
             minMaxProductUnits.Minimum = obj.Minimum;
             minMaxProductUnits.Maximum = obj.Maximum;
 
-            var update = _context.MinMaxProds.Update(minMaxProductUnits);
-            await _context.SaveChangesAsync();
+            _context.MinMaxProducts.Update(minMaxProductUnits);
+            int updated = await _context.SaveChangesAsync();
 
-            return update != null;
+            return updated > 0;
         }
         public async Task<bool> DeleteAsync(int id)
         {
-            var minMaxProductUnits = await _context.MinMaxProds.SingleAsync(x => x.Id == id);
+            var minMaxProductUnits = await _context.MinMaxProducts.SingleAsync(x => x.Id == id);
 
-            var delete = _context.MinMaxProds.Remove(minMaxProductUnits);
-            await _context.SaveChangesAsync();
+            _context.MinMaxProducts.Remove(minMaxProductUnits);
+            int deleted = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return deleted > 0;
         }
-
-        public async Task<IQueryable<MinMaxProd>> GetAllAsync()
+        public async Task<MinMaxProduct> GetByIdAsync(int id)
         {
-            var queryable =  _context.MinMaxProds;
-            return queryable;
+            return await _context.MinMaxProducts.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<MinMaxProd> GetByIdAsync(int id)
+        public async Task<IQueryable<MinMaxProduct>> GetAllAsync()
         {
-            var minMaxProductUnits = await _context.MinMaxProds.FirstOrDefaultAsync(x => x.Id == id);
-            return minMaxProductUnits;
+            return _context.MinMaxProducts;
         }
-
-        
     }
 }

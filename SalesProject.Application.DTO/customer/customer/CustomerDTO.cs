@@ -1,15 +1,10 @@
 ﻿using SalesProject.Application.DTO.customer.category;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.DTO.customer.customer
 {
     public class CustomerDTO
     {
-        public int Id { get; set; }
+        public string Code { get; set; }
         public string Nit { get; set; }
         public string Cui { get; set; }
         public string Name { get; set; }

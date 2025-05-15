@@ -50,7 +50,7 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (document.Data == null)
             {
-                return NotFound(new ResponseError("The document id was not found."));
+                return NotFound(new ResponseError("The document name was not found."));
             }
 
             return Ok(document.Data);

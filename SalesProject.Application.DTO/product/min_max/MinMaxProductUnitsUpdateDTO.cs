@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.product.min_max
 {
     public class MinMaxProductUnitsUpdateDTO
     {
         [Required(ErrorMessage = "{0} must not be empty.")]
-        public int ProductId { get; set; }
+        public string ProductSku { get; set; }
         [Required(ErrorMessage = "{0} must not be empty.")]
-        public int CellarId { get; set; }
+        public string CellarCode { get; set; }
         [Required(ErrorMessage = "{0} must not be empty.")]
         public int Minimum { get; set; }
         [Required(ErrorMessage = "{0} must not be empty.")]

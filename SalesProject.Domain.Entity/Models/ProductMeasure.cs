@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace SalesProject.Domain.Entity.Models;
 
-public partial class CustomerCat
+public partial class ProductMeasure
 {
     public int Id { get; set; }
 
     public string Name { get; set; }
 
-    public virtual ICollection<Customer> Customers { get; } = new List<Customer>();
+    public virtual ICollection<Product> Products { get; } = new List<Product>();
 }

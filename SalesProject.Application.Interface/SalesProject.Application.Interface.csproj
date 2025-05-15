@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SalesProject.Application.DTO\SalesProject.Application.DTO.csproj" />
+    <ProjectReference Include="..\SalesProject.Domain.Interface\SalesProject.Domain.Interface.csproj" />
     <ProjectReference Include="..\SalesProject.Transversal.Common\SalesProject.Transversal.Common.csproj" />
   </ItemGroup>
 

@@ -1,30 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using SalesProject.Transversal.Common;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class CustomerRepository : IGenericRepository<Customer>
+    public class CustomerRepository : IGenericRepositoryTwo<Customer>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
         public CustomerRepository() 
         {
-            _context = new FerreteriaDbContext();
+            _context = new ApiDbContext();
         }
 
         #region async methods
         public async Task<bool> InsertAsync(Customer obj)
         {
-            var insert = await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.Customers.AddAsync(obj);
+            int insert = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return insert > 0;
         }
-        public async Task<bool> UpdateAsync(int id, Customer obj)
+        public async Task<bool> UpdateAsync(string code, Customer obj)
         {
-            var customer = await _context.Customers.SingleOrDefaultAsync(x => x.Id == id);
+            var customer = await _context.Customers.SingleOrDefaultAsync(x => x.Code == code);
 
             customer.Nit = (!string.IsNullOrEmpty(obj.Nit)) ? obj.Nit : customer.Nit;
             customer.Cui = (!string.IsNullOrEmpty(obj.Cui)) ? obj.Cui : customer.Cui;
@@ -37,27 +35,26 @@ namespace SalesProject.Infraestructure.Repository
             customer.Defaulter = obj.Defaulter;
             customer.CategoryId = customer.CategoryId;
 
-            var save = await _context.SaveChangesAsync();
+            int updated = await _context.SaveChangesAsync();
 
-            return save > 0;
+            return updated > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string code)
         {
-            var customer = await _context.Customers.SingleAsync(x => x.Id == id);
-            var delete = _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
+            var customer = await _context.Customers.SingleAsync(x => x.Code == code);
 
-            return delete != null;
+            _context.Customers.Remove(customer);
+            int deleted = await _context.SaveChangesAsync();
+
+            return deleted > 0;
         }
-        public async Task<Customer> GetByIdAsync(int id)
+        public async Task<Customer> GetByCodeAsync(string code)
         {
-            var customer = await _context.Customers.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
-            return customer;
+            return await _context.Customers.Include(x => x.Category).FirstOrDefaultAsync(x => x.Code == code);
         }
         public async Task<IQueryable<Customer>> GetAllAsync()
         {
-            IQueryable<Customer> customers = _context.Customers.Include(x => x.Category);
-            return customers;
+            return _context.Customers.Include(x => x.Category);
         }
         #endregion
     }

@@ -1,28 +1,27 @@
 ﻿using SalesProject.Application.DTO.buy_return.buy_return_detail;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SalesProject.Application.DTO.document.document;
+using SalesProject.Application.DTO.supplier.supplier;
+using SalesProject.Application.DTO.transaction_state;
+using SalesProject.Application.DTO.user.user;
 
 namespace SalesProject.Application.DTO.buy_return.buy_return
 {
     public class BuyReturnDTO
     {
         public int Id { get; set; }
-        public int DocumentId { get; set; }
-        public int SupplierId { get; set; }
-        public int UserId { get; set; }
-        public int TransStateId { get; set; }
-        public string NoDoc { get; set; }
+        public int NoDoc { get; set; }
         public string Serie { get; set; }
         public bool Credit { get; set; }
         public DateTime DateTrans { get; set; }
         public DateTime Date { get; set; }
+        public TransactionStateDTO TransState { get; set; }
+        public DocumentDTO Document { get; set; }
+        public UserDTO User { get; set; }
+        public SupplierDTO Supplier {get; set;}
         public string Observation { get; set; }
-        public decimal Subtotal { get; set; }
-        public decimal Iva { get; set; }
-        public decimal Total { get; set; }
+        public double Subtotal { get; set; }
+        public double Iva { get; set; }
+        public double Total { get; set; }
         public List<BuyReturnDetDTO> BuyReturnDets { get; set; }
     }
 }

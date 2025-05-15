@@ -106,8 +106,8 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute] int id)
+        [HttpGet("cancel/{id:int}")]
+        public async Task<ActionResult> Cancel([FromRoute] int id)
         {
             var buyReturn = await _buyReturnApplication.GetByIdAsync(id);
 
@@ -116,7 +116,7 @@ namespace SalesProject.Services.WebApi.Controllers
                 return NotFound(new ResponseError("The buy return id was not found."));
             }
 
-            var delete = await _buyReturnApplication.DeleteAsync(id);
+            var delete = await _buyReturnApplication.CancelAsync(id);
 
             if (!delete.IsSuccess)
             {

@@ -5,6 +5,8 @@ namespace SalesProject.Application.DTO.customer.customer
     public class CustomerCreateDTO
     {
         [Required(ErrorMessage = "{0} must not be empty.")]
+        public string Code { get; set; }
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public string Nit { get; set; }
         public string? Cui { get; set; }
 

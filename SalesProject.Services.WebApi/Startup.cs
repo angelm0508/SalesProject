@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SalesProject.Application.Interface;
 using SalesProject.Application.Main;
 using SalesProject.Domain.Core;
@@ -7,6 +9,7 @@ using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
 using SalesProject.Infraestructure.Repository;
 using SalesProject.Transversal.Mapper;
+using System.Text;
 
 namespace SalesProject.Services.WebApi
 {
@@ -24,64 +27,89 @@ namespace SalesProject.Services.WebApi
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
-            services.AddDbContext<FerreteriaDbContext>(options => 
+
+            services.AddDbContext<ApiDbContext>(options => 
             {
-                options.UseSqlServer(Configuration.GetConnectionString("FerreteriaDB"));
+                options.UseSqlServer(Configuration.GetConnectionString("API_DB"));
             });
 
-            //services.AddSingleton<>();
+            #region set up authentication 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                };
+            });
+
+            services.AddAuthorization();
+            #endregion
+
+           
             services.AddAutoMapper(x => x.AddProfile(new MappingProfile()));
-            services.AddTransient<IGenericRepository<Customer>, CustomerRepository>();
+
+            services.AddTransient<IGenericRepositoryTwo<Customer>, CustomerRepository>();
             services.AddTransient<ICustomerDomain, CustomerDomain>();
             services.AddTransient<ICustomerApplication, CustomerApplication>();
 
-            services.AddTransient<IGenericRepository<CustomerCat>, CustomerCatRepository>();
+            services.AddTransient<IGenericRepositoryTwo<UserSy>, AuthenticateRepository>();
+            services.AddTransient<IAuthenticateDomain, AuthenticateDomain>();
+            services.AddTransient<IAuthenticateApplication, AuthenticationApplication>();
+
+            services.AddTransient<IGenericRepositoryThree<CustomerCategory>, CustomerCatRepository>();
             services.AddTransient<ICustomerCatDomain, CustomerCatDomain>();
             services.AddTransient<ICustomerCatApplication, CustomerCatApplication>();
 
-            services.AddTransient<IGenericRepository<Supplier>, SupplierRepository>();
+            services.AddTransient<IGenericRepositoryTwo<Supplier>, SupplierRepository>();
             services.AddTransient<ISupplierDomain, SupplierDomain>();
             services.AddTransient<ISupplierApplication, SupplierApplication>();
 
-            services.AddTransient<IGenericRepository<SupplierCat>, SupplierCatRepository>();
+            services.AddTransient<IGenericRepositoryThree<SupplierCategory>, SupplierCatRepository>();
             services.AddTransient<ISupplierCatDomain, SupplierCatDomain>();
             services.AddTransient<ISupplierCatApplication, SupplierCatApplication>();
 
-            services.AddTransient<IGenericRepository<Cellar>, CellarRepository>();
+            services.AddTransient<IGenericRepositoryTwo<Cellar>, CellarRepository>();
             services.AddTransient<ICellarDomain, CellarDomain>();
             services.AddTransient<ICellarApplication, CellarApplication>();
 
-            services.AddTransient<IGenericRepository<Product>, ProductRepository>();
+            services.AddTransient<IGenericRepositoryTwo<Product>, ProductRepository>();
             services.AddTransient<IProductDomain, ProductDomain>();
             services.AddTransient<IProductApplication, ProductApplication>();
 
-            services.AddTransient<IGenericRepository<Brand>, ProductBrandRepository>();
+            services.AddTransient<IGenericRepositoryThree<ProductBrand>, ProductBrandRepository>();
             services.AddTransient<IProductBrandDomain, ProductBrandDomain>();
             services.AddTransient<IProductBrandApplication, ProductBrandApplication>();
 
-            services.AddTransient<IGenericRepository<ProductCat>, ProductCategoryRepository>();
+            services.AddTransient<IGenericRepositoryThree<ProductCategory>, ProductCategoryRepository>();
             services.AddTransient<IProductCategoryDomain, ProductCategoryDomain>();
             services.AddTransient<IProductCategoryApplication, ProductCategoryApplication>();
 
-            services.AddTransient<IGenericRepository<Measure>, ProductMeasureRepository>();
+            services.AddTransient<IGenericRepositoryThree<ProductMeasure>, ProductMeasureRepository>();
             services.AddTransient<IProductMeasureDomain, ProductMeasureDomain>();
             services.AddTransient<IProductMeasureApplication, ProductMeasureApplication>();
 
-            services.AddTransient<IGenericRepository<MinMaxProd>, MinMaxProductUnitsRepository>();
+            services.AddTransient<IGenericRepositoryThree<MinMaxProduct>, MinMaxProductUnitsRepository>();
             services.AddTransient<IMinMaxProductUnitsDomain, MinMaxProductUnitsDomain>();
             services.AddTransient<IMinMaxProductUnitsApplication, MinMaxProductUnitsApplication>();
 
-            services.AddTransient<IGenericRepository<DocumentType>, DocumentTypeRepository>();
+            services.AddTransient<IGenericRepositoryThree<DocumentType>, DocumentTypeRepository>();
             services.AddTransient<IDocumentTypeDomain, DocumentTypeDomain>();
             services.AddTransient<IDocumentTypeApplication, DocumentTypeApplication>();
 
-            services.AddTransient<IGenericRepository<Document>, DocumentRepository>();
+            services.AddTransient<IGenericRepositoryThree<Document>, DocumentRepository>();
             services.AddTransient<IDocumentDomain, DocumentDomain>();
             services.AddTransient<IDocumentApplication, DocumentApplication>();
 
-            services.AddTransient<IGenericRepository<CategorySalePrice>, SalePriceCategoryRepository>();
+            /*services.AddTransient<IGenericRepository<CategorySalePrice>, SalePriceCategoryRepository>();
             services.AddTransient<ISalePriceCategoryDomain, SalePriceCategoryDomain>();
-            services.AddTransient<ISalePriceCategoryApplication, SalePriceCatApplication>();
+            services.AddTransient<ISalePriceCategoryApplication, SalePriceCatApplication>();*/
 
             services.AddTransient<IGenericRepository<BuyOrder>, BuyOrderRepository>();
             services.AddTransient<IBuyOrderDomain, BuyOrderDomain>();
@@ -107,13 +135,9 @@ namespace SalesProject.Services.WebApi
             services.AddTransient<ISaleReturnDomain, SaleReturnDomain>();
             services.AddTransient<ISaleReturnApplication, SaleReturnApplication>();
 
-            services.AddTransient<IGenericRepository<CellarTransfer>, CellarTransferRepository>();
+            services.AddTransient<IGenericRepositoryThree<CellarTransfer>, CellarTransferRepository>();
             services.AddTransient<ICellarTransferDomain, CellarTransferDomain>();
             services.AddTransient<ICellarTransferApplication, CellarTransferApplication>();
-
-            
-
-
 
         }
 
@@ -128,8 +152,11 @@ namespace SalesProject.Services.WebApi
 
 
             app.UseHttpsRedirection();
-            app.UseAuthorization();
+
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();

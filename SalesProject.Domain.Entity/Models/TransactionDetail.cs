@@ -17,15 +17,15 @@ public partial class TransactionDetail
 
     public int? CellarTransferId { get; set; }
 
-    public int? ProductId { get; set; }
+    public string ProductSku { get; set; }
 
-    public int? CellarId { get; set; }
+    public string CellarCode { get; set; }
 
-    public int? Units { get; set; }
+    public decimal Units { get; set; }
 
-    public DateTime? Date { get; set; }
+    public DateTime Date { get; set; }
 
-    public decimal? Value { get; set; }
+    public decimal Value { get; set; }
 
     public string NoDoc { get; set; }
 
@@ -33,11 +33,11 @@ public partial class TransactionDetail
 
     public virtual BuyReturn BuyReturn { get; set; }
 
-    public virtual Cellar Cellar { get; set; }
+    public virtual Cellar CellarCodeNavigation { get; set; }
 
     public virtual CellarTransfer CellarTransfer { get; set; }
 
-    public virtual Product Product { get; set; }
+    public virtual Product ProductSkuNavigation { get; set; }
 
     public virtual Sale Sale { get; set; }
 

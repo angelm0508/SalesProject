@@ -19,12 +19,13 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
+        #region async methods
         public async Task<Response<bool>> InsertAsync(SupplierCatCreateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
-                var supplier = _mapper.Map<SupplierCat>(obj);
+                var supplier = _mapper.Map<SupplierCategory>(obj);
                 response.Data = await _supplierCatDomain.InsertAsync(supplier);
                 if (response.Data)
                 {
@@ -43,7 +44,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var category = _mapper.Map<SupplierCat>(obj);
+                var category = _mapper.Map<SupplierCategory>(obj);
                 response.Data = await _supplierCatDomain.UpdateAsync(id, category);
                 if (response.Data)
                 {
@@ -71,6 +72,40 @@ namespace SalesProject.Application.Main
                 }
             }
             catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<SupplierCatDTO>> GetByIdAsync(int id)
+        {
+            var response = new Response<SupplierCatDTO>();
+            try
+            {
+                var category = await _supplierCatDomain.GetByIdAsync(id);
+                response.Data = _mapper.Map<SupplierCatDTO>(category);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<SupplierCatDTO>> GetByNameAsync(string name)
+        {
+            var response = new Response<SupplierCatDTO>();
+            try
+            {
+                var category = await _supplierCatDomain.GetByNameAsync(name);
+                response.Data = _mapper.Map<SupplierCatDTO>(category);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }
@@ -110,40 +145,6 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-
-        public async Task<Response<SupplierCatDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<SupplierCatDTO>();
-            try
-            {
-                var category = await _supplierCatDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<SupplierCatDTO>(category);
-                response.IsSuccess= true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<SupplierCatDTO>> GetByNameAsync(string name)
-        {
-            var response = new Response<SupplierCatDTO>();
-            try
-            {
-                var category = await _supplierCatDomain.GetByNameAsync(name);
-                response.Data = _mapper.Map<SupplierCatDTO>(category);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
+        #endregion
     }
 }

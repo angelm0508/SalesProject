@@ -1,32 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class SupplierRepository : IGenericRepository<Supplier>
+    public class SupplierRepository : IGenericRepositoryTwo<Supplier>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
         public SupplierRepository() 
         {
-            _context= new FerreteriaDbContext();
+            _context= new ApiDbContext();
         }
         #region async methods
         public async Task<bool> InsertAsync(Supplier obj)
         {
-            var insert = _context.Add(obj);
-            await _context.SaveChangesAsync();
+            await _context.Suppliers.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return inserted > 0;
         }
-        public async Task<bool> UpdateAsync(int id, Supplier obj)
+        public async Task<bool> UpdateAsync(string code, Supplier obj)
         {
-            var supplier = await _context.Suppliers.SingleAsync(x => x.Id == id);
+            var supplier = await _context.Suppliers.SingleAsync(x => x.Code == code);
 
             supplier.Nit = obj.Nit;
             supplier.Name = obj.Name;
@@ -34,27 +29,27 @@ namespace SalesProject.Infraestructure.Repository
             supplier.Phone = obj.Phone;
             supplier.CategoryId = obj.CategoryId;
 
-            var save = await _context.SaveChangesAsync();
-            return save > 0;
-        }
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var supplier = await _context.Suppliers.FirstOrDefaultAsync(x => x.Id == id);
+            var updated = await _context.SaveChangesAsync();
 
-            var delete =_context.Remove(supplier);
-            await _context.SaveChangesAsync();
-
-            return delete != null;
+            return updated > 0;
         }
-        public async Task<Supplier> GetByIdAsync(int id)
+        public async Task<bool> DeleteAsync(string code)
         {
-            var supplier = await _context.Suppliers.FirstOrDefaultAsync(x => x.Id == id);
-            return supplier;
+            var supplier = await _context.Suppliers.SingleAsync(x => x.Code == code);
+
+            _context.Remove(supplier);
+            int deleted = await _context.SaveChangesAsync();
+
+            return deleted > 0;
+        }
+        public async Task<Supplier> GetByCodeAsync(string code)
+        {
+            return await _context.Suppliers
+                                    .FirstOrDefaultAsync(x => x.Code == code);
         }
         public async Task<IQueryable<Supplier>> GetAllAsync()
         {
-            IQueryable<Supplier> suppliers = _context.Suppliers.Include(x => x.Category);
-            return suppliers;
+            return _context.Suppliers.Include(x => x.Category);
         }
         #endregion
     }

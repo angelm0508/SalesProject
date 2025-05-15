@@ -8,8 +8,8 @@ namespace SalesProject.Domain.Core
 {
     public class ProductDomain : IProductDomain
     {
-        private readonly IGenericRepository<Product> _genericProductRepo;
-        public ProductDomain(IGenericRepository<Product> genericProductRepo)
+        private readonly IGenericRepositoryTwo<Product> _genericProductRepo;
+        public ProductDomain(IGenericRepositoryTwo<Product> genericProductRepo)
         {
             _genericProductRepo = genericProductRepo;
         }
@@ -23,18 +23,23 @@ namespace SalesProject.Domain.Core
             }
             return await _genericProductRepo.InsertAsync(obj);
         }
-        public async Task<bool> UpdateAsync(int id, Product obj)
+        public async Task<bool> UpdateAsync(string sku, Product obj)
         {
-            return await _genericProductRepo.UpdateAsync(id, obj);  
+            return await _genericProductRepo.UpdateAsync(sku, obj);  
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string sku)
         {
-            return await _genericProductRepo.DeleteAsync(id);
+            return await _genericProductRepo.DeleteAsync(sku);
         }
-        public async Task<Product> GetByIdAsync(int id)
+
+        public async Task<Product> GetBySkuAsync(string sku)
         {
-            return await _genericProductRepo.GetByIdAsync(id);
+            var queryable = await _genericProductRepo.GetAllAsync();
+            var product = await queryable.FirstOrDefaultAsync(x => x.Sku == sku);
+
+            return product;
         }
+
         public async Task<Product> GetByNameAsync(string name)
         {
             var product = await _genericProductRepo.GetAllAsync();
@@ -60,17 +65,6 @@ namespace SalesProject.Domain.Core
             var queryable = await _genericProductRepo.GetAllAsync();
             return await queryable.Where(x => x.Sku.Contains(sku)).ToListAsync();
         }
-
-        public async Task<Product> GetBySkuAsync(string sku)
-        {
-            var queryable = await _genericProductRepo.GetAllAsync();
-            var product = await queryable.FirstOrDefaultAsync(x => x.Sku == sku);
-
-            return product;
-        }
-
-        
-
         #endregion
     }
 }

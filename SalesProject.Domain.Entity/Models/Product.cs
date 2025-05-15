@@ -5,8 +5,6 @@ namespace SalesProject.Domain.Entity.Models;
 
 public partial class Product
 {
-    public int Id { get; set; }
-
     public string Sku { get; set; }
 
     public string Name { get; set; }
@@ -25,23 +23,31 @@ public partial class Product
 
     public int? BrandId { get; set; }
 
-    public virtual Brand Brand { get; set; }
+    public int? PriceList { get; set; }
+
+    public virtual ICollection<BatchProduct> BatchProducts { get; } = new List<BatchProduct>();
+
+    public virtual ICollection<BatchTransaction> BatchTransactions { get; } = new List<BatchTransaction>();
+
+    public virtual ProductBrand Brand { get; set; }
+
+    public virtual ICollection<BuyDet> BuyDets { get; } = new List<BuyDet>();
 
     public virtual ICollection<BuyOrderDet> BuyOrderDets { get; } = new List<BuyOrderDet>();
 
     public virtual ICollection<BuyReturnDet> BuyReturnDets { get; } = new List<BuyReturnDet>();
 
-    public virtual ProductCat Category { get; set; }
+    public virtual ProductCategory Category { get; set; }
 
     public virtual ICollection<CellarTransferDet> CellarTransferDets { get; } = new List<CellarTransferDet>();
 
     public virtual ICollection<Inventory> Inventories { get; } = new List<Inventory>();
 
-    public virtual Measure Measure { get; set; }
+    public virtual ProductMeasure Measure { get; set; }
 
-    public virtual ICollection<MinMaxProd> MinMaxProds { get; } = new List<MinMaxProd>();
+    public virtual ICollection<MinMaxProduct> MinMaxProducts { get; } = new List<MinMaxProduct>();
 
-    public virtual ICollection<ProductSalePrice> ProductSalePrices { get; } = new List<ProductSalePrice>();
+    public virtual ProductPriceList PriceListNavigation { get; set; }
 
     public virtual ICollection<SaleDet> SaleDets { get; } = new List<SaleDet>();
 
@@ -49,7 +55,7 @@ public partial class Product
 
     public virtual ICollection<SaleReturnDet> SaleReturnDets { get; } = new List<SaleReturnDet>();
 
-    public virtual ProductStum Status { get; set; }
+    public virtual ProductState Status { get; set; }
 
     public virtual ICollection<TransactionDetail> TransactionDetails { get; } = new List<TransactionDetail>();
 }

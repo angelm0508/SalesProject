@@ -10,7 +10,7 @@ namespace SalesProject.Infraestructure.Data
         {
             get
             {
-                var context = new FerreteriaDbContext();
+                var context = new ApiDbContext();
                 return (IDbConnection)context;
             }
         }

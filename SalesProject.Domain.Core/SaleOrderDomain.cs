@@ -2,22 +2,19 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class SaleOrderDomain : ISaleOrderDomain
     {
+
         public readonly IGenericRepository<SaleOrder> _genericSaleOrderRepo;
-        public readonly IGenericRepository<Document> _genericDocumentRepo;
+        public readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
         public readonly IGenericRepository<Sale> _genericSaleRepo;
 
         public SaleOrderDomain(IGenericRepository<SaleOrder> genericSaleOrderRepo,
-                                IGenericRepository<Document> genericDocumentRepo,
+                                IGenericRepositoryThree<Document> genericDocumentRepo,
                                 IGenericRepository<Sale> genericSaleRepo
                                 )
         {
@@ -35,7 +32,7 @@ namespace SalesProject.Domain.Core
                 throw new Exception("The input document is not for a sale order type document.");
             }
 
-            if (!await IsASaleDocument(obj.OutputDocumentId))
+            if (!await IsAOutputSaleDocument(obj.OutputDocumentId))
             {
                 throw new Exception("The output document is not for a sale type document.");
             }
@@ -49,15 +46,28 @@ namespace SalesProject.Domain.Core
         }
         public async Task<bool> UpdateAsync(int id, SaleOrder obj)
         {
-            return await _genericSaleOrderRepo.UpdateAsync(id, obj);
-        }
-        public async Task<bool> DeleteAsync(int id)
-        {
+            if (await IsCanceled(id))
+            {
+                throw new Exception("This sale order is already canceled.");
+            }
             if (await HasSaleGenerated(id))
             {
-                throw new Exception("There is a buy generated from this buy order. Please delete it first and try again.");
+                throw new Exception("There is a sale generated from this sale order. Please delete it first and try again.");
             }
-            return await _genericSaleOrderRepo.DeleteAsync(id);
+
+            return await _genericSaleOrderRepo.UpdateAsync(id, obj);
+        }
+        public async Task<bool> CancelAsync(int id)
+        {
+            if (await IsCanceled(id))
+            {
+                throw new Exception("This sale order is already canceled.");
+            }
+            if (await HasSaleGenerated(id))
+            {
+                throw new Exception("There is a sale generated from this sale order. Please delete it first and try again.");
+            }
+            return await _genericSaleOrderRepo.CancelAsync(id);
         }
         public async Task<SaleOrder> GetByIdAsync(int id)
         {
@@ -73,34 +83,9 @@ namespace SalesProject.Domain.Core
             return await _genericSaleOrderRepo.GetAllAsync();
         }
 
-        #region validations
-        public async Task<bool> RegisterExists(SaleOrder obj)
-        {
-            var queryable = await _genericSaleOrderRepo.GetAllAsync();
-            return await queryable.AnyAsync(x => x.NoDoc == obj.NoDoc && x.Serie == obj.Serie 
-                                        && x.DocumentId == obj.DocumentId);
-        }
-
-        public async Task<bool> IsASaleOrderDocument(int id)
-        {
-            var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "sale order";
-        }
-        public async Task<bool> IsASaleDocument(int id)
-        {
-            var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "sale";
-        }
-
-        public async Task<bool> HasSaleGenerated(int id)
-        {
-            var queryable = await _genericSaleRepo.GetAllAsync();
-            return await queryable.AnyAsync(x => x.SaleOrderId == id);
-        }
-
         public async Task<bool> GenerateSaleBasedOnSaleOrder(Sale obj)
         {
-            if (await HasSaleGenerated(obj.SaleOrderId ?? 0))
+            if (await HasSaleGenerated((int)obj.SaleOrderId))
             {
                 throw new Exception("There is already a sale created with this sale order id.");
             }
@@ -108,6 +93,36 @@ namespace SalesProject.Domain.Core
             return await _genericSaleRepo.InsertAsync(obj);
         }
 
+        #region validations
+        public async Task<bool> IsCanceled(int id)
+        {
+            var saleOrder = await GetByIdAsync(id);
+
+            return saleOrder.TransStateId == (int)Enumerators.TransactionStates.Cancelado;
+        }
+
+        public async Task<bool> RegisterExists(SaleOrder obj)
+        {
+            var queryable = await _genericSaleOrderRepo.GetAllAsync();
+            return await queryable.AnyAsync(x => x.NoDoc == obj.NoDoc && x.Serie == obj.Serie 
+                                        && x.DocumentId == obj.DocumentId);
+        }
+        public async Task<bool> HasSaleGenerated(int id)
+        {
+            var queryable = await _genericSaleRepo.GetAllAsync();
+            return await queryable.AnyAsync(x => x.SaleOrderId == id);
+        }
+
+        public async Task<bool> IsASaleOrderDocument(int id)
+        {
+            var document = await _genericDocumentRepo.GetByIdAsync(id);
+            return document.DocumentTypeId == (int) Enumerators.DocumentTypes.Cotizacion;
+        }
+        public async Task<bool> IsAOutputSaleDocument(int id)
+        {
+            var document = await _genericDocumentRepo.GetByIdAsync(id);
+            return document.DocumentTypeId == (int) Enumerators.DocumentTypes.Venta;
+        }
         
         #endregion
 

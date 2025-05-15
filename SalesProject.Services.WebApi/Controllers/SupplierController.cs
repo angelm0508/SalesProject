@@ -17,10 +17,10 @@ namespace SalesProject.Services.WebApi.Controllers
             _supplierApplication = supplierApplication;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<SupplierDTO>> GetById([FromRoute]int id)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<SupplierDTO>> GetByCode([FromRoute]string code)
         {
-            var supplier = await _supplierApplication.GetByIdAsync(id);
+            var supplier = await _supplierApplication.GetByCodeAsync(code);
 
             if (!supplier.IsSuccess)
             {
@@ -29,13 +29,13 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (supplier.Data == null)
             {
-                return NotFound(new ResponseError($"The supplier id was not found."));
+                return NotFound(new ResponseError($"The supplier code was not found."));
             }
 
             return Ok(supplier.Data);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("byName/{name}")]
         public async Task<ActionResult<SupplierDTO>> GetByName([FromRoute]string name)
         {
             var supplier = await _supplierApplication.GetByNameAsync(name);
@@ -47,7 +47,7 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (supplier.Data == null)
             {
-                return NotFound(new ResponseError($"The supplier id was not found."));
+                return NotFound(new ResponseError($"The supplier name was not found."));
             }
 
             return Ok(supplier.Data);
@@ -129,17 +129,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute]int id, [FromBody]SupplierUpdateDTO obj)
+        [HttpPut("{code}")]
+        public async Task<ActionResult> Update([FromRoute]string code, [FromBody]SupplierUpdateDTO obj)
         {
-            var supplier = await _supplierApplication.GetByIdAsync(id);
+            var supplier = await _supplierApplication.GetByCodeAsync(code);
 
             if (supplier.Data == null)
             {
-                return NotFound(new ResponseError("The supplier id was not found."));
+                return NotFound(new ResponseError("The supplier code was not found."));
             }
 
-            var update = await _supplierApplication.UpdateAsync(id, obj);
+            var update = await _supplierApplication.UpdateAsync(code, obj);
 
             if (!update.IsSuccess)
             {
@@ -149,16 +149,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute] int id)
+        [HttpDelete("{code}")]
+        public async Task<ActionResult> Delete([FromRoute] string code)
         {
-            var supplier = await _supplierApplication.GetByIdAsync(id);
+            var supplier = await _supplierApplication.GetByCodeAsync(code);
 
             if (supplier.Data == null)
             {
-                return NotFound(new ResponseError("The supplier id was not found."));
+                return NotFound(new ResponseError("The supplier code was not found."));
             }
-            var update = await _supplierApplication.DeleteAsync(id);
+
+            var update = await _supplierApplication.DeleteAsync(code);
 
             if (!update.IsSuccess)
             {

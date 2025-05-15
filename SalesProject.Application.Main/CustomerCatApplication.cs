@@ -1,15 +1,9 @@
 ﻿using AutoMapper;
-using SalesProject.Application.DTO.customer;
 using SalesProject.Application.DTO.customer.category;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -25,12 +19,13 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
+        #region async methods
         public async Task<Response<bool>> InsertAsync(CustomerCatCreateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
-                var customer = _mapper.Map<CustomerCat>(obj);
+                var customer = _mapper.Map<CustomerCategory>(obj);
                 response.Data = await _customerCatDomain.InsertAsync(customer);
                 if (response.Data)
                 {
@@ -50,7 +45,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var customer = _mapper.Map<CustomerCat>(obj);
+                var customer = _mapper.Map<CustomerCategory>(obj);
                 response.Data = await _customerCatDomain.UpdateAsync(id, customer);
                 if (response.Data)
                 {
@@ -75,40 +70,6 @@ namespace SalesProject.Application.Main
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<IEnumerable<CustomerCatDTO>>> GetAllAsync()
-        {
-            var response = new Response<IEnumerable<CustomerCatDTO>>();
-            try
-            {
-                var customers = await _customerCatDomain.GetAllAsync();
-                response.Data = _mapper.Map<IEnumerable<CustomerCatDTO>>(customers);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<IEnumerable<CustomerCatDTO>>> GetAllTthatContainsNameAsync(string name)
-        {
-            var response = new Response<IEnumerable<CustomerCatDTO>>();
-            try
-            {
-                var customers = await _customerCatDomain.GetAllTthatContainsNameAsync(name);
-                response.Data = _mapper.Map<IEnumerable<CustomerCatDTO>>(customers);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -150,5 +111,41 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+
+        public async Task<Response<IEnumerable<CustomerCatDTO>>> GetAllAsync()
+        {
+            var response = new Response<IEnumerable<CustomerCatDTO>>();
+            try
+            {
+                var customers = await _customerCatDomain.GetAllAsync();
+                response.Data = _mapper.Map<IEnumerable<CustomerCatDTO>>(customers);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<IEnumerable<CustomerCatDTO>>> GetAllTthatContainsNameAsync(string name)
+        {
+            var response = new Response<IEnumerable<CustomerCatDTO>>();
+            try
+            {
+                var customers = await _customerCatDomain.GetAllTthatContainsNameAsync(name);
+                response.Data = _mapper.Map<IEnumerable<CustomerCatDTO>>(customers);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+        #endregion
+
     }
 }

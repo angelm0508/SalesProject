@@ -5,11 +5,6 @@ using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -23,12 +18,14 @@ namespace SalesProject.Application.Main
             _productCategoryDomain = productCategoryDomain;
             _mapper = mapper;
         }
+
+        #region async methods
         public async Task<Response<bool>> InsertAsync(ProductCatCreateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
-                var category = _mapper.Map<ProductCat>(obj);
+                var category = _mapper.Map<ProductCategory>(obj);
                 response.Data = await _productCategoryDomain.InsertAsync(category);
                 if (response.Data)
                 {
@@ -49,7 +46,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var category = _mapper.Map<ProductCat>(obj);
+                var category = _mapper.Map<ProductCategory>(obj);
                 response.Data = await _productCategoryDomain.UpdateAsync(id, category);
                 if (response.Data)
                 {
@@ -75,6 +72,24 @@ namespace SalesProject.Application.Main
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"{ex.Message} \n {ex.InnerException}";
+            }
+
+            return response;
+        }
+
+        public async Task<Response<ProductCatDTO>> GetByIdAsync(int id)
+        {
+            var response = new Response<ProductCatDTO>();
+            try
+            {
+                var category = await _productCategoryDomain.GetByIdAsync(id);
+                response.Data = _mapper.Map<ProductCatDTO>(category);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -140,25 +155,6 @@ namespace SalesProject.Application.Main
 
             return response;
         }
-
-        public async Task<Response<ProductCatDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<ProductCatDTO>();
-            try
-            {
-                var category = await _productCategoryDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<ProductCatDTO>(category);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"{ex.Message} \n {ex.InnerException}";
-            }
-
-            return response;
-        }
-
-        
+        #endregion
     }
 }

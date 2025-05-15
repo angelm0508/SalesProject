@@ -1,64 +1,57 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class ProductCategoryRepository : IGenericRepository<ProductCat>
+    public class ProductCategoryRepository : IGenericRepositoryThree<ProductCategory>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public ProductCategoryRepository(FerreteriaDbContext context)
+        public ProductCategoryRepository(ApiDbContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> InsertAsync(ProductCat obj)
+        public async Task<bool> InsertAsync(ProductCategory obj)
         {
-            var insert = await _context.ProductCats.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.ProductCategories.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return inserted > 0;
         }
 
-        public async Task<bool> UpdateAsync(int id, ProductCat obj)
+        public async Task<bool> UpdateAsync(int id, ProductCategory obj)
         {
-            var category = await _context.ProductCats.FirstOrDefaultAsync(x => x.Id == id);
+            var category = await _context.ProductCategories.FirstOrDefaultAsync(x => x.Id == id);
 
             category.Name = obj.Name;
 
-            var update = _context.ProductCats.Update(category);
-            await _context.SaveChangesAsync();
+            _context.ProductCategories.Update(category);
+            int updated = await _context.SaveChangesAsync();
 
-            return update != null;
+            return updated > 0;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var category = await _context.ProductCats.SingleAsync(x => x.Id == id);
+            var category = await _context.ProductCategories.SingleAsync(x => x.Id == id);
 
-            var delete = _context.ProductCats.Remove(category);
-            await _context.SaveChangesAsync();
+            _context.ProductCategories.Remove(category);
+            int deleted = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return deleted > 0;
         }
 
-        public async Task<ProductCat> GetByIdAsync(int id)
+        public async Task<ProductCategory> GetByIdAsync(int id)
         {
-            var category = await _context.ProductCats.FirstOrDefaultAsync(x => x.Id == id);
-            return category;
+            return await _context.ProductCategories
+                                    .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IQueryable<ProductCat>> GetAllAsync()
+        public async Task<IQueryable<ProductCategory>> GetAllAsync()
         {
-            IQueryable<ProductCat> queryable = _context.ProductCats;
-            return queryable;
+            return _context.ProductCategories;
         }
     }
 }

@@ -7,8 +7,8 @@ namespace SalesProject.Domain.Core
 {
     public class SupplierDomain : ISupplierDomain
     {
-        private readonly IGenericRepository<Supplier> _genericSupplierRepo;
-        public SupplierDomain(IGenericRepository<Supplier> genericRepository) 
+        private readonly IGenericRepositoryTwo<Supplier> _genericSupplierRepo;
+        public SupplierDomain(IGenericRepositoryTwo<Supplier> genericRepository) 
         {
             _genericSupplierRepo = genericRepository;
         }
@@ -16,20 +16,33 @@ namespace SalesProject.Domain.Core
         #region async methods
         public async Task<bool> InsertAsync(Supplier obj)
         {
-            if (await RegisterExists(obj))
+            if (await ExistSupplier(obj.Code))
             {
-                throw new Exception("There is already a suppplier created with the same NIT and name.");
+                throw new Exception("There is already created a supplier with the same code.");
             }
+
             return await _genericSupplierRepo.InsertAsync(obj);
         }
 
-        public async Task<bool> UpdateAsync(int id, Supplier obj)
+        public async Task<bool> UpdateAsync(string code, Supplier obj)
         {
-            return await _genericSupplierRepo.UpdateAsync(id, obj);
+            return await _genericSupplierRepo.UpdateAsync(code, obj);
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string code)
         {
-            return await _genericSupplierRepo.DeleteAsync(id);
+            return await _genericSupplierRepo.DeleteAsync(code);
+        }
+
+        public async Task<Supplier> GetByCodeAsync(string code)
+        {
+            return await _genericSupplierRepo.GetByCodeAsync(code);
+        }
+
+        public async Task<Supplier> GetByNameAsync(string name)
+        {
+            var suppliers = await _genericSupplierRepo.GetAllAsync();
+
+            return await suppliers.FirstOrDefaultAsync(x => x.Name == name);
         }
 
         public Task<IQueryable<Supplier>> GetAllAsync()
@@ -41,37 +54,33 @@ namespace SalesProject.Domain.Core
             return _genericSupplierRepo.GetAllAsync();
         }
 
-        public async Task<IEnumerable<Supplier>> GetAllTthatContainsNameAsync(string name)
-        {
-            var suppliers = await _genericSupplierRepo.GetAllAsync();
-            return await suppliers.Where(x => x.Name.Contains(name)).ToListAsync();
-        }
-
-        public async Task<Supplier> GetByIdAsync(int id)
-        {
-            return await _genericSupplierRepo.GetByIdAsync(id);
-        }
-
-        public async Task<Supplier> GetByNameAsync(string name)
-        {
-            var suppliers = await _genericSupplierRepo.GetAllAsync();
-            return await suppliers.FirstOrDefaultAsync(x => x.Name == name);
-        }
-
-        public async Task<bool> RegisterExists(Supplier obj)
-        {
-            var queryable = await _genericSupplierRepo.GetAllAsync();
-            var exist = await queryable.AnyAsync(x => x.Nit == obj.Nit && x.Name == obj.Name);
-
-            return exist;
-        }
-
         public async Task<IEnumerable<Supplier>> GetAllThatContainsNitAsync(string nit)
         {
             var suppliers = await _genericSupplierRepo.GetAllAsync();
-            return await suppliers.Where(x => x.Nit.Contains(nit)).ToListAsync();
+
+            return await suppliers.Where(
+                                      x => x.Nit.Contains(nit)
+                                  )
+                                  .ToListAsync();
+        }
+        public async Task<IEnumerable<Supplier>> GetAllTthatContainsNameAsync(string name)
+        {
+            var suppliers = await _genericSupplierRepo.GetAllAsync();
+            
+            return await suppliers.Where(
+                                        x => x.Name.Contains(name)
+                                    )
+                                  .ToListAsync();
         }
 
+        #region validations
+        public async Task<bool> ExistSupplier(string code)
+        {
+            var supplier = await GetByCodeAsync(code);
+
+            return supplier != null;
+        }
+        #endregion
         #endregion
     }
 }

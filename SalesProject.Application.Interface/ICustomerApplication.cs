@@ -8,9 +8,9 @@ namespace SalesProject.Application.Interface
     {
         #region async methods
         Task<Response<bool>> InsertAsync(CustomerCreateDTO obj);
-        Task<Response<bool>> UpdateAsync(int id, CustomerUpdateDTO obj);
-        Task<Response<bool>> DeleteAsync(int id);
-        Task<Response<CustomerDTO>> GetByIdAsync(int id);
+        Task<Response<bool>> UpdateAsync(string code, CustomerUpdateDTO obj);
+        Task<Response<bool>> DeleteAsync(string code);
+        Task<Response<CustomerDTO>> GetByCodeAsync(string code);
         Task<Response<CustomerDTO>> GetByNameAsync(string name);
         Task<Response<IEnumerable<CustomerDTO>>> GetAllTthatContainsNameAsync(string name);
         Task<Response<IEnumerable<CustomerDTO>>> GetAllAsync();

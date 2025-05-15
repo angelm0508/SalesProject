@@ -4,11 +4,11 @@ using SalesProject.Infraestructure.Interface;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class ProductRepository : IGenericRepository<Product>
+    public class ProductRepository : IGenericRepositoryTwo<Product>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public ProductRepository(FerreteriaDbContext context) 
+        public ProductRepository(ApiDbContext context) 
         {
             _context = context;
         }
@@ -16,16 +16,15 @@ namespace SalesProject.Infraestructure.Repository
         #region async methods
         public async Task<bool> InsertAsync(Product obj)
         {
-            var insert = await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.Products.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return inserted > 0;
         }
-        public async Task<bool> UpdateAsync(int id, Product obj)
+        public async Task<bool> UpdateAsync(string sku, Product obj)
         {
-            var product = await _context.Products.SingleOrDefaultAsync(x => x.Id == id);
+            var product = await _context.Products.SingleOrDefaultAsync(x => x.Sku == sku);
 
-            product.Sku = obj.Sku;
             product.Name = obj.Name;
             product.Description = obj.Description;
             product.BuyPrice = obj.BuyPrice;
@@ -34,33 +33,35 @@ namespace SalesProject.Infraestructure.Repository
             product.BrandId = obj.BrandId;
             product.StatusId = obj.StatusId;
 
-            var save = await _context.SaveChangesAsync();
+            int updated = await _context.SaveChangesAsync();
 
-            return save > 0;
+            return updated > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string sku)
         {
-            var product = await _context.Products.SingleAsync(x => x.Id == id);
-            var delete = _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            var product = await _context.Products.SingleAsync(x => x.Sku == sku);
 
-            return delete != null;
+            _context.Products.Remove(product);
+            int deleted = await _context.SaveChangesAsync();
+
+            return deleted > 0;
         }
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<Product> GetByCodeAsync(string sku)
         {
-            var product = await _context.Products.Include(x => x.Category)
-                                            .Include(x => x.Brand)
-                                            .Include(x => x.Measure)
-                                            .FirstOrDefaultAsync(x => x.Id == id);
-            return product;
+            return await _context.Products
+                                    .Include(x => x.Category)
+                                    .Include(x => x.Brand)
+                                    .Include(x => x.Measure)
+                                    .FirstOrDefaultAsync(x => x.Sku == sku);
         }
         public async Task<IQueryable<Product>> GetAllAsync()
         {
-            IQueryable<Product> queryable = _context.Products.Include(x => x.Brand)
-                                                .Include(x => x.Measure)
-                                                .Include(x => x.Status) 
-                                                .Include(x => x.Category); 
-            return queryable;
+            return _context.Products
+                            .Include(x => x.Status)
+                            .Include(x => x.Brand)
+                            .Include(x => x.Measure)
+                            .Include(x => x.Status) 
+                            .Include(x => x.Category); 
         }
         #endregion
     }

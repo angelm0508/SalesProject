@@ -1,59 +1,58 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class CellarRepository : IGenericRepository<Cellar>
+    public class CellarRepository : IGenericRepositoryTwo<Cellar>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
         public CellarRepository() 
         {
-            _context = new FerreteriaDbContext();
+            _context = new ApiDbContext();
         }
+
         #region async methods
         public async Task<bool> InsertAsync(Cellar obj)
         {
-            var insert = await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
 
-            return insert != null;
+            var insert = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_insert_cellar @code={obj.Code}, @name={obj.Name}, @address={obj.Address}").ToListAsync();
+
+            if (!string.IsNullOrEmpty(insert[0].ErrorMessage))
+                throw new Exception(insert[0].ErrorMessage);
+
+            return true;
         }
-        public async Task<bool> UpdateAsync(int id, Cellar obj)
+        public async Task<bool> UpdateAsync(string code, Cellar obj)
         {
-            var cellar = await _context.Cellars.FirstOrDefaultAsync(x => x.Id == id);
+            var cellar = await _context.Cellars.FirstOrDefaultAsync(x => x.Code == code);
 
             cellar.Name = obj.Name;
             cellar.Address = obj.Address;
 
-            var update = _context.Cellars.Update(cellar);
-            await _context.SaveChangesAsync();
+            _context.Cellars.Update(cellar);
+            int updated = await _context.SaveChangesAsync();
 
-            return update != null;
+            return updated > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string code)
         {
-            var cellar = await _context.Cellars.SingleAsync(x => x.Id == id);
-            var delete = _context.Cellars.Remove(cellar);
-            await _context.SaveChangesAsync();
+            var cellar = await _context.Cellars.SingleAsync(x => x.Code == code);
+             
+            _context.Cellars.Remove(cellar);
+            int deleted = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return deleted > 0;
         }
-        public async Task<Cellar> GetByIdAsync(int id)
+        public async Task<Cellar> GetByCodeAsync(string code)
         {
-            var cellar = await _context.Cellars.FirstOrDefaultAsync(x => x.Id == id);
-            return cellar;
+            return await _context.Cellars.FirstOrDefaultAsync(x => x.Code == code);
         }
         public async Task<IQueryable<Cellar>> GetAllAsync()
         {
-            IQueryable<Cellar> queryable = _context.Cellars;
-            return queryable;
+            return _context.Cellars;
         }
         #endregion
+
     }
 }

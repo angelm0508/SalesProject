@@ -19,10 +19,10 @@ namespace SalesProject.Services.WebApi.Controllers
             _productApplication = productApplication;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductDTO>> GetById([FromRoute]int id)
+        [HttpGet("{sku}")]
+        public async Task<ActionResult<ProductDTO>> GetBySku([FromRoute]string sku)
         {
-            var product = await _productApplication.GetByIdAsync(id);
+            var product = await _productApplication.GetBySkuAsync(sku);
 
             if (!product.IsSuccess)
             {
@@ -31,13 +31,13 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (product.Data == null) 
             {
-                return NotFound(new ResponseError("The product id was not found."));
+                return NotFound(new ResponseError("The product sku was not found."));
             }
 
             return Ok(product.Data);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("byName/{name}")]
         public async Task<ActionResult<ProductDTO>> GetByName([FromRoute] string name)
         {
             var product = await _productApplication.GetByNameAsync(name);
@@ -131,17 +131,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute]int id, [FromBody] ProductUpdateDTO obj)
+        [HttpPut("{sku}")]
+        public async Task<ActionResult> Update([FromRoute]string sku, [FromBody] ProductUpdateDTO obj)
         {
-            var product = await _productApplication.GetByIdAsync(id);
+            var product = await _productApplication.GetBySkuAsync(sku);
 
             if (product.Data == null)
             {
-                return NotFound(new ResponseError("The product id was not found."));
+                return NotFound(new ResponseError("The product sku was not found."));
             }
 
-            var insert = await _productApplication.UpdateAsync(id, obj);
+            var insert = await _productApplication.UpdateAsync(sku, obj);
 
             if (!insert.IsSuccess)
             {
@@ -151,17 +151,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute]int id)
+        [HttpDelete("{sku}")]
+        public async Task<ActionResult> Delete([FromRoute]string sku)
         {
-            var product = await _productApplication.GetByIdAsync(id);
+            var product = await _productApplication.GetBySkuAsync(sku);
 
             if (product.Data == null)
             {
-                return NotFound(new ResponseError("The product id was not found."));
+                return NotFound(new ResponseError("The product sku was not found."));
             }
 
-            var delete = await _productApplication.DeleteAsync(id);
+            var delete = await _productApplication.DeleteAsync(sku);
 
             if (!delete.IsSuccess)
             {

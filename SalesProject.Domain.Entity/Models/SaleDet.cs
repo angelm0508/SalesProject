@@ -9,25 +9,23 @@ public partial class SaleDet
 
     public int SaleId { get; set; }
 
-    public int ProductId { get; set; }
-
-    public int CellarId { get; set; }
-
-    public decimal Price { get; set; }
-
-    public int Units { get; set; }
-
-    public decimal? Discount { get; set; }
-
-    public decimal? SubTotal { get; set; }
+    public string ProductSku { get; set; }
 
     public string Name { get; set; }
 
-    public string Sku { get; set; }
+    public string CellarCode { get; set; }
 
-    public virtual Cellar Cellar { get; set; }
+    public decimal? Price { get; set; }
 
-    public virtual Product Product { get; set; }
+    public decimal Units { get; set; }
+
+    public decimal? Discount { get; set; }
+
+    public decimal SubTotal { get; set; }
+
+    public virtual Cellar CellarCodeNavigation { get; set; }
+
+    public virtual Product ProductSkuNavigation { get; set; }
 
     public virtual Sale Sale { get; set; }
 }

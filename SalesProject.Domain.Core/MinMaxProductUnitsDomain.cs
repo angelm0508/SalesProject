@@ -2,32 +2,26 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System.Runtime.InteropServices;
 
 namespace SalesProject.Domain.Core
 {
     public class MinMaxProductUnitsDomain : IMinMaxProductUnitsDomain
     {
-        private readonly IGenericRepository<MinMaxProd> _genericMinMaxProdsRepo;
-        private readonly IGenericRepository<Cellar> _genericCellarRepo;
+        private readonly IGenericRepositoryThree<MinMaxProduct> _genericMinMaxProdsRepo;
+        private readonly IGenericRepositoryTwo<Cellar> _genericCellarRepo;
 
-        public MinMaxProductUnitsDomain(IGenericRepository<MinMaxProd> genericMinMaxProdsRepo, 
-                IGenericRepository<Cellar> genericCellarRepo)
+        public MinMaxProductUnitsDomain(IGenericRepositoryThree<MinMaxProduct> genericMinMaxProdsRepo, 
+                IGenericRepositoryTwo<Cellar> genericCellarRepo)
         {
             _genericMinMaxProdsRepo = genericMinMaxProdsRepo;
             _genericCellarRepo = genericCellarRepo;
         }
 
-        public async Task<bool> InsertAsync(MinMaxProd obj)
+        public async Task<bool> InsertAsync(MinMaxProduct obj)
         {
-            if (!await IsAValidCellarId(obj.CellarId))
+            if (!await IsAValidCellarCode(obj.CellarCode))
             {
-                throw new Exception("Please enter a valid cellar id.");
-            }
-
-            if (!AreManimumAndMaximumValid(obj.Minimum, obj.Maximum))
-            {
-                throw new Exception("Maximum must be grather than minimum value.");
+                throw new Exception("Please enter a valid cellar code.");
             }
 
             if (await RegisterExist(obj))
@@ -35,14 +29,24 @@ namespace SalesProject.Domain.Core
                 throw new Exception("There is already a min max register to this product and cellar.");
             }
 
+            if (!AreManimumAndMaximumValid(obj.Minimum, obj.Maximum))
+            {
+                throw new Exception("Maximum must be grather than minimum value.");
+            }
+
             return await _genericMinMaxProdsRepo.InsertAsync(obj);
         }
 
-        public async Task<bool> UpdateAsync(int id, MinMaxProd obj)
+        public async Task<bool> UpdateAsync(int id, MinMaxProduct obj)
         {
-            if (!await IsAValidCellarId(obj.CellarId))
+            if (!await IsAValidCellarCode(obj.CellarCode))
             {
-                throw new Exception("Please enter a valid cellar id.");
+                throw new Exception("Please enter a valid cellar code.");
+            }
+
+            if (! await RegisterToUpdateExist(id, obj))
+            {
+                throw new Exception("There is already a min max register to this product and cellar.");
             }
 
             if (!AreManimumAndMaximumValid(obj.Minimum, obj.Maximum))
@@ -57,31 +61,37 @@ namespace SalesProject.Domain.Core
             return await _genericMinMaxProdsRepo.DeleteAsync(id);
         }
 
-        public async Task<IQueryable<MinMaxProd>> GetAllAsync()
-        {
-            return await _genericMinMaxProdsRepo.GetAllAsync();
-        }
-
-        public async Task<IQueryable<MinMaxProd>> GetAllWithPagingAsync()
-        {
-            return await _genericMinMaxProdsRepo.GetAllAsync();
-        }
-
-        public async Task<MinMaxProd> GetByIdAsync(int id)
+        public async Task<MinMaxProduct> GetByIdAsync(int id)
         {
             return await _genericMinMaxProdsRepo.GetByIdAsync(id);
         }
-
-        public async Task<bool> RegisterExist(MinMaxProd obj)
+        
+        public async Task<IQueryable<MinMaxProduct>> GetAllAsync()
         {
-            var queryable = await _genericMinMaxProdsRepo.GetAllAsync();
-            return await queryable.AnyAsync(x => x.ProductId == obj.ProductId && x.CellarId == obj.CellarId); 
-
+            return await _genericMinMaxProdsRepo.GetAllAsync();
         }
 
-        public async Task<bool> IsAValidCellarId(int cellarId)
+        public async Task<IQueryable<MinMaxProduct>> GetAllWithPagingAsync()
         {
-            var cellar = await _genericCellarRepo.GetByIdAsync(cellarId);
+            return await _genericMinMaxProdsRepo.GetAllAsync();
+        }
+
+        #region validations
+        public async Task<bool> RegisterExist(MinMaxProduct obj)
+        {
+            var queryable = await _genericMinMaxProdsRepo.GetAllAsync();
+            return await queryable.AnyAsync(x => x.ProductSku == obj.ProductSku && x.CellarCode == obj.CellarCode); 
+        }
+
+        public async Task<bool> RegisterToUpdateExist(int id, MinMaxProduct obj)
+        {
+            var queryable = await _genericMinMaxProdsRepo.GetAllAsync();
+            return await queryable.AnyAsync(x => x.Id != id && x.ProductSku == obj.ProductSku && x.CellarCode == obj.CellarCode);
+        }
+
+        public async Task<bool> IsAValidCellarCode(string cellarId)
+        {
+            var cellar = await _genericCellarRepo.GetByCodeAsync(cellarId);
             return cellar != null;
         }
 
@@ -89,6 +99,6 @@ namespace SalesProject.Domain.Core
         {
             return max > min;
         }
-
+        #endregion
     }
 }

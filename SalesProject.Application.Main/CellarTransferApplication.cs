@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using SalesProject.Application.DTO.cellar_transfer.cellar_transfer;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.Interface;
@@ -10,7 +9,7 @@ using SalesProject.Transversal.Common;
 
 namespace SalesProject.Application.Main
 {
-    public class CellarTransferApplication : ICellarTransferApplication
+    public class CellarTransferApplication: ICellarTransferApplication
     {
         private readonly ICellarTransferDomain _cellarTransferDomain;
         private readonly IMapper _mapper;
@@ -135,7 +134,7 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-
         #endregion
+
     }
 }

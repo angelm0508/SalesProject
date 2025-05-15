@@ -2,20 +2,15 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Domain.Core
 {
     public class DocumentDomain : IDocumentDomain
     {
-        private readonly IGenericRepository<Document> _genericDocumentRepo;
 
-        public DocumentDomain(IGenericRepository<Document> genericRepository)
+        private readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
+
+        public DocumentDomain(IGenericRepositoryThree<Document> genericRepository)
         {
             _genericDocumentRepo= genericRepository;
         }
@@ -38,6 +33,19 @@ namespace SalesProject.Domain.Core
             return _genericDocumentRepo.DeleteAsync(id);
         }
 
+        public async Task<Document> GetByIdAsync(int id)
+        {
+            return await _genericDocumentRepo.GetByIdAsync(id);
+        }
+
+        public async Task<Document> GetByNameAsync(string name)
+        {
+            var customerQueryable = await _genericDocumentRepo.GetAllAsync();
+            var documents = customerQueryable.FirstOrDefault(x => x.Description.Equals(name));
+
+            return documents;
+        }
+
         public async Task<IQueryable<Document>> GetAllAsync()
         {
             return await _genericDocumentRepo.GetAllAsync();
@@ -56,19 +64,14 @@ namespace SalesProject.Domain.Core
             return documents;
         }
 
-        public async Task<Document> GetByIdAsync(int id)
+        public async Task<List<Document>> GetAllByDocumentTypeAsync(string name)
         {
-            return await _genericDocumentRepo.GetByIdAsync(id);
+            var queryable = await _genericDocumentRepo.GetAllAsync();
+            return await queryable.Where(x => x.DocumentType.Description == name).ToListAsync();
         }
 
-        public async Task<Document> GetByNameAsync(string name)
-        {
-            var customerQueryable = await _genericDocumentRepo.GetAllAsync();
-            var documents = customerQueryable.FirstOrDefault(x => x.Description.Equals(name));
 
-            return documents;
-        }
-
+        #region validations
         public async Task<bool> RegisterExists(Document obj)
         {
             var queryable = await _genericDocumentRepo.GetAllAsync();
@@ -77,11 +80,7 @@ namespace SalesProject.Domain.Core
                                                 x.Description == obj.Description && x.Serie == obj.Serie);
             return exist;
         }
+        #endregion
 
-        public async Task<List<Document>> GetAllByDocumentTypeAsync(string name)
-        {
-            var queryable = await _genericDocumentRepo.GetAllAsync();
-            return await queryable.Where(x => x.DocumentType.Description == name).ToListAsync();
-        }
     }
 }

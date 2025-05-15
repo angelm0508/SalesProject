@@ -4,49 +4,50 @@ using SalesProject.Infraestructure.Interface;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class ProductBrandRepository : IGenericRepository<Brand>
+    public class ProductBrandRepository : IGenericRepositoryThree<ProductBrand>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public ProductBrandRepository(FerreteriaDbContext context) 
+        public ProductBrandRepository(ApiDbContext context) 
         {
             _context = context;
         }
-        #region async methods
-        public async Task<bool> InsertAsync(Brand obj)
-        {
-            var insert = await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
 
-            return insert != null;
-        }
-        public async Task<bool> UpdateAsync(int id, Brand obj)
+        #region async methods
+        public async Task<bool> InsertAsync(ProductBrand obj)
         {
-            var brand = await _context.Brands.SingleOrDefaultAsync(x => x.Id == id);
+            await _context.ProductBrands.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
+
+            return inserted > 0;
+        }
+        public async Task<bool> UpdateAsync(int id, ProductBrand obj)
+        {
+            var brand = await _context.ProductBrands.SingleOrDefaultAsync(x => x.Id == id);
 
             brand.Name = obj.Name;
 
-            var save = await _context.SaveChangesAsync();
-            return save > 0;
+            int updated = await _context.SaveChangesAsync();
+            return updated > 0;
         }
         public async Task<bool> DeleteAsync(int id)
         {
-            var brand = await _context.Brands.SingleAsync(x => x.Id == id);
-            var delete = _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
+            var brand = await _context.ProductBrands.SingleAsync(x => x.Id == id);
+            
+            _context.ProductBrands.Remove(brand);
+            int deleted = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return deleted > 0;
         }
-        public async Task<Brand> GetByIdAsync(int id)
+        public async Task<ProductBrand> GetByIdAsync(int id)
         {
-            var brand = await _context.Brands.FirstOrDefaultAsync(x => x.Id == id);
-            return brand;
+            return await _context.ProductBrands.FirstOrDefaultAsync(x => x.Id == id);
         }
-        public async Task<IQueryable<Brand>> GetAllAsync()
+        public async Task<IQueryable<ProductBrand>> GetAllAsync()
         {
-            IQueryable<Brand> queryable = _context.Brands;
-            return queryable;
+            return _context.ProductBrands;
         }
         #endregion
+
     }
 }

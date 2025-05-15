@@ -17,6 +17,7 @@ namespace SalesProject.Application.Main
             _cellarDomain = cellarDomain;
             _mapper = mapper;
         }
+
         #region async methods
         public async Task<Response<bool>> InsertAsync(CellarCreateDTO obj)
         {
@@ -37,14 +38,14 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> UpdateAsync(int id, CellarUpdateDTO obj)
+        public async Task<Response<bool>> UpdateAsync(string code, CellarUpdateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
                 var cellar = _mapper.Map<Cellar>(obj);
-                cellar.Id = id;
-                response.Data = await _cellarDomain.UpdateAsync(id, cellar);
+
+                response.Data = await _cellarDomain.UpdateAsync(code, cellar);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -57,12 +58,12 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> DeleteAsync(string code)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _cellarDomain.DeleteAsync(id);
+                response.Data = await _cellarDomain.DeleteAsync(code);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -75,12 +76,12 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<CellarDTO>> GetByIdAsync(int id)
+        public async Task<Response<CellarDTO>> GetByCodeAsync(string code)
         {
             var response = new Response<CellarDTO>();
             try
             {
-                var cellar = await _cellarDomain.GetByIdAsync(id);
+                var cellar = await _cellarDomain.GetByCodeAsync(code);
                 response.Data = _mapper.Map<CellarDTO>(cellar);
                 response.IsSuccess = true;
                 response.Message = "Query successfully.";
@@ -125,5 +126,6 @@ namespace SalesProject.Application.Main
             return response;
         }
         #endregion
+
     }
 }

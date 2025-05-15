@@ -6,11 +6,6 @@ using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -24,12 +19,14 @@ namespace SalesProject.Application.Main
             _minMaxProductUnitsDomain = minMaxProductUnitsDomain;
             _mapper = mapper;
         }
+
+        #region async methods
         public async Task<Response<bool>> InsertAsync(MinMaxProductUnitsCreateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
-                var minMaxProd = _mapper.Map<MinMaxProd>(obj);
+                var minMaxProd = _mapper.Map<MinMaxProduct>(obj);
                 response.Data = await _minMaxProductUnitsDomain.InsertAsync(minMaxProd);
                 if (response.Data)
                 {
@@ -50,7 +47,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var minMaxProd = _mapper.Map<MinMaxProd>(obj);
+                var minMaxProd = _mapper.Map<MinMaxProduct>(obj);
                 response.Data = await _minMaxProductUnitsDomain.UpdateAsync(id, minMaxProd);
                 if (response.Data)
                 {
@@ -76,6 +73,25 @@ namespace SalesProject.Application.Main
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"{ex.Message} \n {ex.InnerException}";
+            }
+
+            return response;
+        }
+
+        public async Task<Response<MinMaxProductUnitsDTO>> GetByIdAsync(int id)
+        {
+            var response = new Response<MinMaxProductUnitsDTO>();
+            try
+            {
+                var minMaxProd = await _minMaxProductUnitsDomain.GetByIdAsync(id);
+
+                response.Data = _mapper.Map<MinMaxProductUnitsDTO>(minMaxProd);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -123,25 +139,6 @@ namespace SalesProject.Application.Main
 
             return response;
         }
-
-        public async Task<Response<MinMaxProductUnitsDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<MinMaxProductUnitsDTO>();
-            try
-            {
-                var minMaxProd = await _minMaxProductUnitsDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<MinMaxProductUnitsDTO>(minMaxProd);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"{ex.Message} \n {ex.InnerException}";
-            }
-
-            return response;
-        }
-
-        
+        #endregion
     }
 }

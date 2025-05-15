@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SalesProject.Application.DTO.document.document;
-using SalesProject.Application.DTO.document.documentType;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
@@ -21,6 +20,7 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
+        #region async methods
         public async Task<Response<bool>> InsertAsync(DocumentCreateDTO obj)
         {
             var response = new Response<bool>();
@@ -71,6 +71,41 @@ namespace SalesProject.Application.Main
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<DocumentDTO>> GetByIdAsync(int id)
+        {
+            var response = new Response<DocumentDTO>();
+            try
+            {
+                var documentType = await _documentDomain.GetByIdAsync(id);
+                response.Data = _mapper.Map<DocumentDTO>(documentType);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<DocumentDTO>> GetByNameAsync(string name)
+        {
+            var response = new Response<DocumentDTO>();
+            try
+            {
+                var documentType = await _documentDomain.GetByNameAsync(name);
+                response.Data = _mapper.Map<DocumentDTO>(documentType);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -132,41 +167,6 @@ namespace SalesProject.Application.Main
             return response;
         }
 
-        public async Task<Response<DocumentDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<DocumentDTO>();
-            try
-            {
-                var documentType = await _documentDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<DocumentDTO>(documentType);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<DocumentDTO>> GetByNameAsync(string name)
-        {
-            var response = new Response<DocumentDTO>();
-            try
-            {
-                var documentType = await _documentDomain.GetByNameAsync(name);
-                response.Data = _mapper.Map<DocumentDTO>(documentType);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
         public async Task<Response<List<DocumentDTO>>> GetAllByDocumentTypeAsync(string name)
         {
             var response = new Response<List<DocumentDTO>>();
@@ -186,5 +186,6 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+        #endregion
     }
 }

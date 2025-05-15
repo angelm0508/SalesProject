@@ -7,7 +7,7 @@ public partial class ProductSalePrice
 {
     public int Id { get; set; }
 
-    public int ProductId { get; set; }
+    public string ProductSku { get; set; }
 
     public int CatSalePriceId { get; set; }
 
@@ -15,5 +15,5 @@ public partial class ProductSalePrice
 
     public virtual CategorySalePrice CatSalePrice { get; set; }
 
-    public virtual Product Product { get; set; }
+    public virtual Product ProductSkuNavigation { get; set; }
 }

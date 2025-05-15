@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Identity.Client;
 using SalesProject.Application.DTO.buy_return.buy_return;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.Interface;
@@ -61,12 +60,12 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> CancelAsync(int id)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _buyReturnDomain.DeleteAsync(id);
+                response.Data = await _buyReturnDomain.CancelAsync(id);
 
                 if (response.Data)
                 {

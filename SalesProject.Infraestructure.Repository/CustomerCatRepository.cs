@@ -4,51 +4,51 @@ using SalesProject.Infraestructure.Interface;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class CustomerCatRepository : IGenericRepository<CustomerCat>
+    public class CustomerCatRepository: IGenericRepositoryThree<CustomerCategory>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
         public CustomerCatRepository() 
         {
-            _context= new FerreteriaDbContext();
+            _context= new ApiDbContext();
         }
 
         #region async methods
-        public async Task<bool> InsertAsync(CustomerCat obj)
+        public async Task<bool> InsertAsync(CustomerCategory obj)
         {
-            var insert = _context.Add(obj);
-            await _context.SaveChangesAsync();
+            _context.CustomerCategories.AddAsync(obj);
+            int insert = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return insert > 0;
         }
-        public async Task<bool> UpdateAsync(int id, CustomerCat obj)
+        public async Task<bool> UpdateAsync(int id, CustomerCategory obj)
         {
-            var category = await _context.CustomerCats.FirstOrDefaultAsync(x => x.Id == id);
+            var category = await _context.CustomerCategories.FirstOrDefaultAsync(x => x.Id == id);
 
-            category.Name = obj.Name;
+            category.Description = obj.Description;
 
-            var save = await _context.SaveChangesAsync();
-            return save > 0;
+            var updated = await _context.SaveChangesAsync();
+            return updated > 0;
         }
         public async Task<bool> DeleteAsync(int id)
         {
-            var customer = await _context.CustomerCats.SingleAsync(x => x.Id == id);
-            var delete = _context.CustomerCats.Remove(customer);
-            await _context.SaveChangesAsync();
+            var customer = await _context.CustomerCategories.SingleAsync(x => x.Id == id);
+            
+            _context.CustomerCategories.Remove(customer);
+            int delete = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return delete > 0;
         }
 
-        public async Task<CustomerCat> GetByIdAsync(int id)
+        public async Task<CustomerCategory> GetByIdAsync(int id)
         {
-            var customerCat = await _context.CustomerCats.FirstOrDefaultAsync(x => x.Id == id);
-            return customerCat;
+            return await _context.CustomerCategories.FirstOrDefaultAsync(x => x.Id == id);
         }
-        public async Task<IQueryable<CustomerCat>> GetAllAsync()
+        public async Task<IQueryable<CustomerCategory>> GetAllAsync()
         {
-            IQueryable<CustomerCat> queryable = _context.CustomerCats;
-            return queryable;
+            return _context.CustomerCategories;
         }
         
         #endregion
+
     }
 }

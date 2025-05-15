@@ -1,31 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Infraestructure.Repository
 {
-    public class DocumentRepository : IGenericRepository<Document>
+    public class DocumentRepository : IGenericRepositoryThree<Document>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
         public DocumentRepository()
         {
-            _context = new FerreteriaDbContext();
+            _context = new ApiDbContext();
         }
 
         #region async methods
         public async Task<bool> InsertAsync(Document obj)
         {
-            var insert = await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
+            await _context.Documents.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-            return insert != null;
+            return inserted > 0;
         }
         public async Task<bool> UpdateAsync(int id, Document obj)
         {
@@ -34,28 +28,26 @@ namespace SalesProject.Infraestructure.Repository
             document.Description = obj.Description;
             document.Serie = obj.Serie;
 
+            int updated = await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
-
-            return true;
+            return updated > 0;
         }
         public async Task<bool> DeleteAsync(int id)
         {
             var document = await _context.Documents.SingleAsync(x => x.Id == id);
-            var delete = _context.Documents.Remove(document);
-            await _context.SaveChangesAsync();
+            
+            _context.Documents.Remove(document);
+            int deleted = await _context.SaveChangesAsync();
 
-            return delete != null;
+            return deleted > 0;
         }
         public async Task<Document> GetByIdAsync(int id)
         {
-            var documentType = await _context.Documents.Include(x => x.DocumentType).FirstOrDefaultAsync(x => x.Id == id);
-            return documentType;
+            return await _context.Documents.Include(x => x.DocumentType).FirstOrDefaultAsync(x => x.Id == id);
         }
         public async Task<IQueryable<Document>> GetAllAsync()
         {
-            IQueryable<Document> queryable = _context.Documents.Include(x => x.DocumentType);
-            return queryable;
+            return _context.Documents.Include(x => x.DocumentType);
         }
         #endregion
     }

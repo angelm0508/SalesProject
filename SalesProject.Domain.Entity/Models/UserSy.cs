@@ -5,7 +5,7 @@ namespace SalesProject.Domain.Entity.Models;
 
 public partial class UserSy
 {
-    public int Id { get; set; }
+    public string Code { get; set; }
 
     public string Username { get; set; }
 

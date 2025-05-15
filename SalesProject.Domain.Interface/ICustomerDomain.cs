@@ -1,6 +1,4 @@
-﻿using SalesProject.Domain.Entity;
-using SalesProject.Domain.Entity.Models;
-using SalesProject.Domain.Entity.Models.pagination;
+﻿using SalesProject.Domain.Entity.Models;
 
 namespace SalesProject.Domain.Interface
 {
@@ -8,15 +6,16 @@ namespace SalesProject.Domain.Interface
     {
         #region async methods
         Task<bool> InsertAsync(Customer obj);
-        Task<bool> UpdateAsync(int id, Customer obj);
-        Task<bool> DeleteAsync(int id);
-        Task<Customer> GetByIdAsync(int id);
+        Task<bool> UpdateAsync(string code, Customer obj);
+        Task<bool> DeleteAsync(string code);
+        Task<Customer> GetByCodeAsync(string code);
         Task<Customer> GetByNameAsync(string name);
-        Task<IEnumerable<Customer>> GetAllTthatContainsNameAsync(string name);
         Task<IQueryable<Customer>> GetAllAsync();
         Task<IQueryable<Customer>> GetAllWithPagingAsync();
-
-        Task<bool> RegisterExists(Customer obj);
+        Task<IEnumerable<Customer>> GetAllTthatContainsNameAsync(string name);
+        #region validations
+        Task<bool> ExistCustomerCode(string code);
+        #endregion
         #endregion
     }
 }

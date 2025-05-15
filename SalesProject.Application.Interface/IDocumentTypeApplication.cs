@@ -11,8 +11,8 @@ namespace SalesProject.Application.Interface
         Task<Response<bool>> DeleteAsync(int id);
         Task<Response<DocumentTypeDTO>> GetByIdAsync(int id);
         Task<Response<DocumentTypeDTO>> GetByNameAsync(string name);
-        Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllTthatContainsNameAsync(string name);
         Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllAsync();
+        Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllTthatContainsNameAsync(string name);
         #endregion
     }
 }

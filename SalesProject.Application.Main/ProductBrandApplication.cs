@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.DTO.product.brand;
-using SalesProject.Application.DTO.product.product;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
@@ -26,7 +25,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var brand = _mapper.Map<Brand>(obj);
+                var brand = _mapper.Map<ProductBrand>(obj);
                 response.Data = await _productBrandDomain.InsertAsync(brand);
                 if (response.Data)
                 {
@@ -45,7 +44,7 @@ namespace SalesProject.Application.Main
             var response = new Response<bool>();
             try
             {
-                var brand = _mapper.Map<Brand>(obj);
+                var brand = _mapper.Map<ProductBrand>(obj);
                 response.Data = await _productBrandDomain.UpdateAsync(id, brand);
                 if (response.Data)
                 {
@@ -109,22 +108,6 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<IEnumerable<ProductBrandDTO>>> GetAllTthatContainsNameAsync(string name)
-        {
-            var response = new Response<IEnumerable<ProductBrandDTO>>();
-            try
-            {
-                var brands = await _productBrandDomain.GetAllThatContainsNameAsync(name);
-                response.Data = _mapper.Map<IEnumerable<ProductBrandDTO>>(brands);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
         public async Task<Response<IEnumerable<ProductBrandDTO>>> GetAllAsync()
         {
             var response = new Response<IEnumerable<ProductBrandDTO>>();
@@ -156,12 +139,28 @@ namespace SalesProject.Application.Main
             }
             catch (Exception ex)
             {
-                response.Message= ex.Message;   
+                response.Message = ex.Message;
             }
 
             return response;
         }
 
+        public async Task<Response<IEnumerable<ProductBrandDTO>>> GetAllTthatContainsNameAsync(string name)
+        {
+            var response = new Response<IEnumerable<ProductBrandDTO>>();
+            try
+            {
+                var brands = await _productBrandDomain.GetAllThatContainsNameAsync(name);
+                response.Data = _mapper.Map<IEnumerable<ProductBrandDTO>>(brands);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
         #endregion
 
     }

@@ -16,10 +16,10 @@ namespace SalesProject.Services.WebApi.Controllers
             _cellarApplication = cellarApplication;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<CellarDTO>> GetById([FromRoute]int id)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<CellarDTO>> GetByCode([FromRoute]string code)
         {
-            var cellar = await _cellarApplication.GetByIdAsync(id);
+            var cellar = await _cellarApplication.GetByCodeAsync(code);
 
             if (!cellar.IsSuccess)
             {
@@ -28,13 +28,13 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (cellar.Data == null)
             {
-                return NotFound(new ResponseError("The cellar id was not found"));
+                return NotFound(new ResponseError("The cellar code was not found"));
             }
 
             return Ok(cellar.Data);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("byName/{name}")]
         public async Task<ActionResult<CellarDTO>> GetByName([FromRoute]string name)
         {
             var cellar = await _cellarApplication.GetByNameAsync(name);
@@ -78,17 +78,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute]int id, [FromBody] CellarUpdateDTO obj)
+        [HttpPut("{code}")]
+        public async Task<ActionResult> Update([FromRoute]string code, [FromBody] CellarUpdateDTO obj)
         {
-            var cellar = await _cellarApplication.GetByIdAsync(id);
+            var cellar = await _cellarApplication.GetByCodeAsync(code);
 
             if (cellar.Data == null)
             {
-                return NotFound(new ResponseError("The cellar id was not found."));
+                return NotFound(new ResponseError("The cellar code was not found."));
             }
 
-            var update = await _cellarApplication.UpdateAsync(id, obj);
+            var update = await _cellarApplication.UpdateAsync(code, obj);
 
             if (!update.IsSuccess)
             {
@@ -98,17 +98,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute] int id)
+        [HttpDelete("{code}")]
+        public async Task<ActionResult> Delete([FromRoute] string code)
         {
-            var cellar = await _cellarApplication.GetByIdAsync(id);
+            var cellar = await _cellarApplication.GetByCodeAsync(code);
 
             if (cellar.Data == null)
             {
-                return NotFound(new ResponseError("The cellar id was not found."));
+                return NotFound(new ResponseError("The cellar code was not found."));
             }
 
-            var delete = await _cellarApplication.DeleteAsync(id);
+            var delete = await _cellarApplication.DeleteAsync(code);
 
             if (!delete.IsSuccess)
             {

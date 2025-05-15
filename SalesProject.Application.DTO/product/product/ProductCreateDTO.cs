@@ -1,12 +1,4 @@
-﻿using SalesProject.Application.DTO.product.brand;
-using SalesProject.Application.DTO.product.category;
-using SalesProject.Application.DTO.product.measure;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.product.product
 {
@@ -14,12 +6,24 @@ namespace SalesProject.Application.DTO.product.product
     {
         [Required(ErrorMessage = "{0} must not be empty.")]
         public string Sku { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public string Name { get; set; }
+
         public string Description { get; set; }
+
         public decimal BuyPrice { get; set; }
-        public int StatusId { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public int CategoryId { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public byte StatusId { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public int MeasureId { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
         public int BrandId { get; set; }
     }
 }

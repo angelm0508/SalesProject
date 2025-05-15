@@ -2,16 +2,17 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class BuyOrderDomain : IBuyOrderDomain
     {
         private readonly IGenericRepository<BuyOrder> _genericBuyOrderRepo;
-        private readonly IGenericRepository<Document> _genericDocumentRepo;
+        private readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
         private readonly IGenericRepository<Buy> _genericBuyRepo;
         public BuyOrderDomain(IGenericRepository<BuyOrder> genericBuyOrderRepo, 
-            IGenericRepository<Document> genericDocumentRepo,
+            IGenericRepositoryThree<Document> genericDocumentRepo,
             IGenericRepository<Buy> genericBuyRepo) 
         {
             _genericBuyOrderRepo = genericBuyOrderRepo;
@@ -40,42 +41,61 @@ namespace SalesProject.Domain.Core
 
         public async Task<bool> UpdateAsync(int id, BuyOrder obj)
         {
+            if (await HasBuyGenerated(id))
+            {
+                throw new Exception("There is a buy generated from this buy order. Can not be update.");
+            }
+            if (await IsCanceled(id))
+            {
+                throw new Exception($"This document is canceled, can't be update.");
+            }
+
             return await _genericBuyOrderRepo.UpdateAsync(id, obj);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
             if (await HasBuyGenerated(id))
             {
-                throw new Exception("There is a buy generated from this buy order. Please delete it first and try again.");
+                throw new Exception("There is a buy generated from this buy order. Buy order can not be deleted.");
+            }
+            if (await IsCanceled(id))
+            {
+                throw new Exception($"This document is already canceled.");
             }
 
-            return await _genericBuyOrderRepo.DeleteAsync(id);
-        }
 
-        public async Task<IQueryable<BuyOrder>> GetAllAsync()
-        {
-            return await _genericBuyOrderRepo.GetAllAsync();
+            return await _genericBuyOrderRepo.CancelAsync(id);
         }
 
         public async Task<BuyOrder> GetByIdAsync(int id)
         {
             return await _genericBuyOrderRepo.GetByIdAsync(id);
         }
+
+        public async Task<IQueryable<BuyOrder>> GetAllAsync()
+        {
+            return await _genericBuyOrderRepo.GetAllAsync();
+        }
+        
         public Task<IQueryable<BuyOrder>> GetAllWithPagingAsync()
         {
             return _genericBuyOrderRepo.GetAllAsync();
         }
 
+        #region another methods
+
         public async Task<bool> GenerateBuyBasedOnBuyOrder(Buy obj)
         {
-            if (await HasBuyGenerated(obj.BuyOrderId ?? 0))
+            if (await HasBuyGenerated((int) obj.BuyOrderId))
             {
                 throw new Exception("There is already a buy created with this buy order id.");
             }
 
             return await _genericBuyRepo.InsertAsync(obj);
         }
+
+        #region validations
         public async Task<bool> HasBuyGenerated(int id)
         {
             var queryable = await _genericBuyRepo.GetAllAsync();
@@ -85,13 +105,13 @@ namespace SalesProject.Domain.Core
         public async Task<bool> IsABuyDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "buy";
+            return document.DocumentType.Id == (int)Enumerators.DocumentTypes.OrdenCompra;
         }
 
         public async Task<bool> IsABuyOrderDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "buy order";
+            return document.DocumentType.Description == "Orden de Compra";
         }
 
         public async Task<bool> RegisterExists(BuyOrder obj)
@@ -100,6 +120,12 @@ namespace SalesProject.Domain.Core
             return await queryable.AnyAsync(x => x.NoDoc == obj.NoDoc && x.Serie == obj.Serie && x.DocumentId == obj.DocumentId);
         }
 
-        
+        public async Task<bool> IsCanceled(int id)
+        {
+            var buyOrder = await _genericBuyOrderRepo.GetByIdAsync(id);
+            return buyOrder.TransStateId == (int) Enumerators.TransactionStates.Cancelado;
+        }
+        #endregion
+        #endregion
     }
 }

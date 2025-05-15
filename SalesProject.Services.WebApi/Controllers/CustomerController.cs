@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SalesProject.Application.DTO.customer.customer;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.Interface;
-using SalesProject.Domain.Entity.Models;
 using SalesProject.Transversal.Common;
 
 namespace SalesProject.Services.WebApi.Controllers
@@ -20,10 +18,10 @@ namespace SalesProject.Services.WebApi.Controllers
             _customerApplication = customerApplication;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<CustomerDTO>> GetById([FromRoute] int id)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<CustomerDTO>> GetByCode([FromRoute] string code)
         {
-            var customer = await _customerApplication.GetByIdAsync(id);
+            var customer = await _customerApplication.GetByCodeAsync(code);
 
             if (!customer.IsSuccess)
             {
@@ -32,13 +30,13 @@ namespace SalesProject.Services.WebApi.Controllers
 
             if (customer.Data == null)
             {
-                return NotFound(new ResponseError($"The customer id was not found"));
+                return NotFound(new ResponseError($"The customer code was not found"));
             }
 
             return Ok(customer.Data);
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("byName/{name}")]
         public async Task<ActionResult<CustomerDTO>> GetByName([FromRoute]string name)
         {
             var customer = await _customerApplication.GetByNameAsync(name);
@@ -120,17 +118,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update([FromRoute]int id, [FromBody] CustomerUpdateDTO customer) 
+        [HttpPut("{code}")]
+        public async Task<ActionResult> Update([FromRoute]string code, [FromBody] CustomerUpdateDTO customer) 
         {
-            var customerById = await _customerApplication.GetByIdAsync(id);
+            var customerById = await _customerApplication.GetByCodeAsync(code);
 
             if (customerById.Data == null)
             {
-                return NotFound(new ResponseError($"The customer id was not found."));
+                return NotFound(new ResponseError($"The customer code was not found."));
             }
 
-            var update = await _customerApplication.UpdateAsync(id, customer);
+            var update = await _customerApplication.UpdateAsync(code, customer);
 
             if (!update.IsSuccess)
             {
@@ -140,17 +138,17 @@ namespace SalesProject.Services.WebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete([FromRoute]int id)
+        [HttpDelete("{code}")]
+        public async Task<ActionResult> Delete([FromRoute]string code)
         {
-            var customer = await _customerApplication.GetByIdAsync(id);
+            var customer = await _customerApplication.GetByCodeAsync(code);
 
             if (customer.Data == null)
             {
-                return BadRequest(new ResponseError($"The customer id was not found."));
+                return BadRequest(new ResponseError($"The customer code was not found."));
             }
 
-            var delete = await _customerApplication.DeleteAsync(id);
+            var delete = await _customerApplication.DeleteAsync(code);
 
             if (!delete.IsSuccess)
             {

@@ -9,19 +9,19 @@ public partial class CellarTransferDet
 
     public int CellarTransId { get; set; }
 
-    public int ProductId { get; set; }
+    public string ProductSku { get; set; }
 
-    public int CellarOriginId { get; set; }
+    public string CellarOriginCode { get; set; }
 
-    public int CellarDestinationId { get; set; }
+    public string CellarDestinationCode { get; set; }
 
-    public int Units { get; set; }
+    public decimal Quantity { get; set; }
 
-    public virtual Cellar CellarDestination { get; set; }
+    public virtual Cellar CellarDestinationCodeNavigation { get; set; }
 
-    public virtual Cellar CellarOrigin { get; set; }
+    public virtual Cellar CellarOriginCodeNavigation { get; set; }
 
     public virtual CellarTransfer CellarTrans { get; set; }
 
-    public virtual Product Product { get; set; }
+    public virtual Product ProductSkuNavigation { get; set; }
 }

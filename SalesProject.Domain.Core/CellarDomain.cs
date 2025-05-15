@@ -7,8 +7,8 @@ namespace SalesProject.Domain.Core
 {
     public class CellarDomain : ICellarDomain
     {
-        private readonly IGenericRepository<Cellar> _genericCellarRepo;
-        public CellarDomain(IGenericRepository<Cellar> genericRepository) 
+        private readonly IGenericRepositoryTwo<Cellar> _genericCellarRepo;
+        public CellarDomain(IGenericRepositoryTwo<Cellar> genericRepository) 
         {
             _genericCellarRepo = genericRepository;
         }
@@ -21,23 +21,17 @@ namespace SalesProject.Domain.Core
             }
             return await _genericCellarRepo.InsertAsync(obj);
         }
-        public async Task<bool> UpdateAsync(int id, Cellar obj)
+        public async Task<bool> UpdateAsync(string code, Cellar obj)
         {
-            return await _genericCellarRepo.UpdateAsync(id, obj);
+            return await _genericCellarRepo.UpdateAsync(code, obj);
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string code)
         {
-            return await _genericCellarRepo.DeleteAsync(id);
+            return await _genericCellarRepo.DeleteAsync(code);
         }
-
-        public async Task<IQueryable<Cellar>> GetAllAsync()
+        public async Task<Cellar> GetByCodeAsync(string code)
         {
-            return await _genericCellarRepo.GetAllAsync();
-        }
-
-        public async Task<Cellar> GetByIdAsync(int id)
-        {
-            return await _genericCellarRepo.GetByIdAsync(id);
+            return await _genericCellarRepo.GetByCodeAsync(code);
         }
 
         public async Task<Cellar> GetByNameAsync(string name)
@@ -46,6 +40,11 @@ namespace SalesProject.Domain.Core
             var cellar = await queryable.FirstOrDefaultAsync(x => x.Name == name);
 
             return cellar;
+        }
+
+        public async Task<IQueryable<Cellar>> GetAllAsync()
+        {
+            return await _genericCellarRepo.GetAllAsync();
         }
         #endregion
     }

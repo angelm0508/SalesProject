@@ -1,18 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.sale.sale_detail
 {
     public class SaleDetCreateDTO
     {
-        public int ProductId { get; set; }
-        public int CellarId { get; set; }
-        public decimal Price { get; set; }
-        public int Units { get; set; }
-        public decimal Discount { get; set; }
-        public decimal Subtotal { get; set; }
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public string ProductSku { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public string CellarCode { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double Price { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double Units { get; set; }
+
+        public double Discount { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empty.")]
+        public double Subtotal { get; set; }
     }
 }

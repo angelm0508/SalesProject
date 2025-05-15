@@ -4,11 +4,6 @@ using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -23,6 +18,7 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
+        #region async methods
         public async Task<Response<bool>> InsertAsync(DocumentTypeCreateDTO obj)
         {
             var response = new Response<bool>();
@@ -81,40 +77,6 @@ namespace SalesProject.Application.Main
             return response;
         }
 
-        public async Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllAsync()
-        {
-            var response = new Response<IEnumerable<DocumentTypeDTO>>();
-            try
-            {
-                var documentsType = await _documentTypeDomain.GetAllAsync();
-                response.Data = _mapper.Map<IEnumerable<DocumentTypeDTO>>(documentsType);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllTthatContainsNameAsync(string name)
-        {
-            var response = new Response<IEnumerable<DocumentTypeDTO>>();
-            try
-            {
-                var documentsType = await _documentTypeDomain.GetAllTthatContainsNameAsync(name);
-                response.Data = _mapper.Map<IEnumerable<DocumentTypeDTO>>(documentsType);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
         public async Task<Response<DocumentTypeDTO>> GetByIdAsync(int id)
         {
             var response = new Response<DocumentTypeDTO>();
@@ -150,5 +112,41 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+
+        public async Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllAsync()
+        {
+            var response = new Response<IEnumerable<DocumentTypeDTO>>();
+            try
+            {
+                var documentsType = await _documentTypeDomain.GetAllAsync();
+                response.Data = _mapper.Map<IEnumerable<DocumentTypeDTO>>(documentsType);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<IEnumerable<DocumentTypeDTO>>> GetAllTthatContainsNameAsync(string name)
+        {
+            var response = new Response<IEnumerable<DocumentTypeDTO>>();
+            try
+            {
+                var documentsType = await _documentTypeDomain.GetAllTthatContainsNameAsync(name);
+                response.Data = _mapper.Map<IEnumerable<DocumentTypeDTO>>(documentsType);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        #endregion
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SalesProject.Application.DTO.customer;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.DTO.supplier.supplier;
 using SalesProject.Application.Interface;
@@ -19,6 +18,7 @@ namespace SalesProject.Application.Main
             _mapper = mapper;
         }
 
+        #region async methods
         public async Task<Response<bool>> InsertAsync(SupplierCreateDTO obj)
         {
             var response = new Response<bool>();
@@ -34,18 +34,18 @@ namespace SalesProject.Application.Main
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
+                response.Message = $"{ex.Message}";
             }
             return response;
         }
 
-        public async Task<Response<bool>> UpdateAsync(int id, SupplierUpdateDTO obj)
+        public async Task<Response<bool>> UpdateAsync(string code, SupplierUpdateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
                 var supplier = _mapper.Map<Supplier>(obj);
-                response.Data = await _supplierDomain.UpdateAsync(id, supplier);
+                response.Data = await _supplierDomain.UpdateAsync(code, supplier);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -58,17 +58,51 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> DeleteAsync(string code)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _supplierDomain.DeleteAsync(id);
+                response.Data = await _supplierDomain.DeleteAsync(code);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
                     response.Message = "Register deleted successfully.";
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<SupplierDTO>> GetByCodeAsync(string code)
+        {
+            var response = new Response<SupplierDTO>();
+            try
+            {
+                var supplier = await _supplierDomain.GetByCodeAsync(code);
+                response.Data = _mapper.Map<SupplierDTO>(supplier);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<Response<SupplierDTO>> GetByNameAsync(string name)
+        {
+            var response = new Response<SupplierDTO>();
+            try
+            {
+                var supplier = await _supplierDomain.GetByNameAsync(name);
+                response.Data = _mapper.Map<SupplierDTO>(supplier);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
             }
             catch (Exception ex)
             {
@@ -131,40 +165,6 @@ namespace SalesProject.Application.Main
             return response;
         }
 
-        public async Task<Response<SupplierDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<SupplierDTO>();
-            try
-            {
-                var supplier = await _supplierDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<SupplierDTO>(supplier);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
-        public async Task<Response<SupplierDTO>> GetByNameAsync(string name)
-        {
-            var response = new Response<SupplierDTO>();
-            try
-            {
-                var supplier = await _supplierDomain.GetByNameAsync(name);
-                response.Data = _mapper.Map<SupplierDTO>(supplier);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-
         public async Task<Response<IEnumerable<SupplierDTO>>> GetAllTthatContainsNitAsync(string nit)
         {
             var response = new Response<IEnumerable<SupplierDTO>>();
@@ -184,5 +184,6 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+        #endregion
     }
 }

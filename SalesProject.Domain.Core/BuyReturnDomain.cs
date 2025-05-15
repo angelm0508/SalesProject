@@ -2,23 +2,18 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class BuyReturnDomain : IBuyReturnDomain
     {
+
         private readonly IGenericRepository<BuyReturn> _genericBuyReturnRepo;
-        private readonly IGenericRepository<Document> _genericDocumentRepo;
+        private readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
 
         public BuyReturnDomain(IGenericRepository<BuyReturn> genericRepository, 
-            IGenericRepository<Document> genericDocumentRepo)
+            IGenericRepositoryThree<Document> genericDocumentRepo)
         {
             _genericBuyReturnRepo = genericRepository;
             _genericDocumentRepo = genericDocumentRepo;
@@ -46,11 +41,17 @@ namespace SalesProject.Domain.Core
         }
         public async Task<bool> UpdateAsync(int id, BuyReturn obj)
         {
+            if (!await IsCanceled(id))
+                throw new Exception("Can't be updated, this buy return is already canceled.");
+
             return await _genericBuyReturnRepo.UpdateAsync(id, obj);
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
-            return await _genericBuyReturnRepo.DeleteAsync(id);
+            if (!await IsCanceled(id))
+                throw new Exception("Can't be cancel, this buy return is already canceled.");
+
+            return await _genericBuyReturnRepo.CancelAsync(id);
         }
         public async Task<BuyReturn> GetByIdAsync(int id)
         {
@@ -64,10 +65,12 @@ namespace SalesProject.Domain.Core
         {
             return await _genericBuyReturnRepo.GetAllAsync();
         }
+
+        #region validations
         public async Task<bool> IsABuyReturnDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "buy return";
+            return document.DocumentType.Id == (int) Enumerators.DocumentTypes.DevolucionCompra;
         }
         public async Task<bool> RegisterExists(BuyReturn obj)
         {
@@ -76,7 +79,16 @@ namespace SalesProject.Domain.Core
                                             && x.DocumentId == obj.DocumentId);
         }
 
-        
+        public async Task<bool> IsCanceled(int id)
+        {
+            var buyReturn = await GetByIdAsync(id);
+
+            return buyReturn.TransStateId == (int) Enumerators.TransactionStates.Cancelado;
+        }
+        #endregion
+
+
+
         #endregion
     }
 }

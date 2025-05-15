@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace SalesProject.Domain.Entity.Models;
 
-public partial class ProductStum
+public partial class ProductCategory
 {
-    public byte Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
 

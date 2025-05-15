@@ -1,27 +1,49 @@
 ﻿using SalesProject.Application.DTO.buy.buy_detail;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.buy.buy
 {
     public class BuyCreateDTO
     {
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public int DocumentId { get; set; }
-        public int SupplierId { get; set; }
-        public int UserId { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public string SupplierCode { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public string UserCode { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public int TransStateId { get; set; }
+
         public int? BuyOrderId { get; set; }
-        public string NoDoc { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public int NoDoc { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public string Serie { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public bool Credit { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public int CreditDays { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public DateTime DateTrans { get; set; }
-        public decimal Subtotal { get; set; }
-        public decimal Iva { get; set; }
-        public decimal Total { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double SubTotal { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double Iva { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double Total { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
         public List<BuyDetCreateDTO> BuyDets { get; set; }
     }
 }

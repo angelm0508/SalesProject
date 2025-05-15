@@ -2,15 +2,17 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class BuyDomain : IBuyDomain
     {
-        private readonly IGenericRepository<Buy> _genericBuyRepo;
-        private readonly IGenericRepository<Document> _genericDocumentRepo;
 
-        public BuyDomain(IGenericRepository<Buy> genericRepository, IGenericRepository<Document> genericDocumentRepo)
+        private readonly IGenericRepository<Buy> _genericBuyRepo;
+        private readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
+
+        public BuyDomain(IGenericRepository<Buy> genericRepository, IGenericRepositoryThree<Document> genericDocumentRepo)
         {
             _genericBuyRepo = genericRepository;
             _genericDocumentRepo = genericDocumentRepo;
@@ -34,13 +36,22 @@ namespace SalesProject.Domain.Core
 
         public async Task<bool> UpdateAsync(int id, Buy obj)
         {
+            if (await IsCanceled(id))
+                throw new Exception($"This document is already canceled.");
+
             return await _genericBuyRepo.UpdateAsync(id, obj);
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
-            return await _genericBuyRepo.DeleteAsync(id);
-        }
+            if (await IsCanceled(id))
+                throw new Exception($"This document is already canceled.");
 
+            return await _genericBuyRepo.CancelAsync(id);
+        }
+        public async Task<Buy> GetByIdAsync(int id)
+        {
+            return await _genericBuyRepo.GetByIdAsync(id);
+        }
         public async Task<IQueryable<Buy>> GetAllAsync()
         {
             return await _genericBuyRepo.GetAllAsync();
@@ -51,15 +62,11 @@ namespace SalesProject.Domain.Core
             return await _genericBuyRepo.GetAllAsync();
         }
 
-        public async Task<Buy> GetByIdAsync(int id)
-        {
-            return await _genericBuyRepo.GetByIdAsync(id);
-        }
-
+        #region validations
         public async Task<bool> IsABuyDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "buy";
+            return document.DocumentType.Id == (int)Enumerators.DocumentTypes.Compra;
         }
 
         public async Task<bool> RegisterExists(Buy obj)
@@ -68,8 +75,13 @@ namespace SalesProject.Domain.Core
             return await queryable.AnyAsync(x => x.NoDoc == obj.NoDoc && x.Serie == obj.Serie && x.DocumentId == obj.DocumentId);
         }
 
-        
+        public async Task<bool> IsCanceled(int id)
+        {
+            var buy = await _genericBuyRepo.GetByIdAsync(id);
 
+            return buy.TransStateId == (int) Enumerators.TransactionStates.Cancelado;
+        }
+        #endregion
         #endregion
     }
 }

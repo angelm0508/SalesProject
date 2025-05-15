@@ -1,20 +1,15 @@
 ﻿using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Domain.Core
 {
     public class CellarTransferDomain : ICellarTransferDomain
     {
-        private readonly IGenericRepository<CellarTransfer> _genericCellarTransRepo;
-        private readonly IGenericRepository<Document> _genericDocumentRepo;
-        public CellarTransferDomain(IGenericRepository<CellarTransfer> genericRepository, 
-            IGenericRepository<Document> genericDocumentRepo)
+        private readonly IGenericRepositoryThree<CellarTransfer> _genericCellarTransRepo;
+        private readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
+        public CellarTransferDomain(IGenericRepositoryThree<CellarTransfer> genericRepository, 
+            IGenericRepositoryThree<Document> genericDocumentRepo)
         {
             _genericCellarTransRepo = genericRepository;
             _genericDocumentRepo = genericDocumentRepo;
@@ -55,6 +50,8 @@ namespace SalesProject.Domain.Core
         {
             return await _genericCellarTransRepo.GetAllAsync();
         }
+
+        #region validations
         public async Task<bool> IsACellarTransferDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
@@ -64,9 +61,9 @@ namespace SalesProject.Domain.Core
         public async Task<bool> RegisterExists(CellarTransfer obj)
         {
             var queryable = await _genericCellarTransRepo.GetAllAsync();
-            return queryable.Any(x => x.NoTransfer == obj.NoTransfer);
+            return queryable.Any(x => x.NoDoc == obj.NoDoc);
         }
-        
+        #endregion
         #endregion
     }
 }

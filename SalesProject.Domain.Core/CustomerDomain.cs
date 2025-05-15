@@ -1,46 +1,48 @@
-﻿using SalesProject.Domain.Interface;
-using SalesProject.Domain.Entity;
+﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
+using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using Microsoft.EntityFrameworkCore;
-using SalesProject.Domain.Entity.Models.pagination;
-using System.Security.Cryptography.X509Certificates;
-using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class CustomerDomain : ICustomerDomain
     {
-        private readonly IGenericRepository<Customer> _genericCustomerRepo;
-        public CustomerDomain(IGenericRepository<Customer> genericCustomerRepo)
+        private readonly IGenericRepositoryTwo<Customer> _genericCustomerRepo;
+        public CustomerDomain(IGenericRepositoryTwo<Customer> genericCustomerRepo)
         {
             _genericCustomerRepo = genericCustomerRepo;
         }
 
+        #region async methods
         public async Task<bool> InsertAsync(Customer obj)
         {
-            if (await RegisterExists(obj))
-            {
-                throw new Exception("There is already a customer created with the same nit and name.");
-            }
+
+            if (await ExistCustomerCode(obj.Code))
+                throw new Exception($"There is already a customer created with the same code."); 
 
             return await _genericCustomerRepo.InsertAsync(obj);
         }
 
-        public async Task<bool> RegisterExists(Customer obj)
+        public async Task<bool> UpdateAsync(string code, Customer obj)
         {
-            var queryable = await _genericCustomerRepo.GetAllAsync();
-            var exist = await queryable.AnyAsync(x => x.Nit == obj.Nit && x.Name == obj.Name);
+            return await _genericCustomerRepo.UpdateAsync(code, obj);
+        }
+        public Task<bool> DeleteAsync(string code)
+        {
+            return _genericCustomerRepo.DeleteAsync(code);
+        }
 
-            return exist;
-        }
-        public async Task<bool> UpdateAsync(int id, Customer obj)
+        public async Task<Customer> GetByCodeAsync(string code)
         {
-            return await _genericCustomerRepo.UpdateAsync(id, obj);
+            return await _genericCustomerRepo.GetByCodeAsync(code);
         }
-        public Task<bool> DeleteAsync(int id)
+
+        public async Task<Customer> GetByNameAsync(string name)
         {
-            return _genericCustomerRepo.DeleteAsync(id);
+            var customerQueryable = await _genericCustomerRepo.GetAllAsync();
+            var customer = customerQueryable.FirstOrDefault(x => x.Name.Equals(name));
+
+            return customer;
         }
 
         public async Task<IQueryable<Customer>> GetAllAsync()
@@ -61,18 +63,15 @@ namespace SalesProject.Domain.Core
             return customers;
         }
 
-        public async Task<Customer> GetByIdAsync(int id)
+        #region validations
+        public async Task<bool> ExistCustomerCode(string code)
         {
-            return await _genericCustomerRepo.GetByIdAsync(id);
+            var queryable = await _genericCustomerRepo.GetAllAsync();
+            var exist = await queryable.AnyAsync(x => x.Code == code);
+
+            return exist;
         }
-
-        public async Task<Customer> GetByNameAsync(string name)
-        {
-            var customerQueryable = await _genericCustomerRepo.GetAllAsync();
-            var customer = customerQueryable.FirstOrDefault(x => x.Name.Equals(name));
-
-            return customer;
-        }
-
+        #endregion
+        #endregion
     }
 }

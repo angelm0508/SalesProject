@@ -1,16 +1,10 @@
 ﻿using AutoMapper;
-using AutoMapper.Configuration.Annotations;
 using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.DTO.sale_return.sale_return;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SalesProject.Application.Main
 {
@@ -66,16 +60,16 @@ namespace SalesProject.Application.Main
 
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> CancelAsync(int id)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _saleReturnDomain.DeleteAsync(id);
+                response.Data = await _saleReturnDomain.CancelAsync(id);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
-                    response.Message = "Register deleted succesfully.";
+                    response.Message = "Register canceled succesfully.";
                 }
             }
             catch (Exception ex)

@@ -1,12 +1,11 @@
-﻿using SalesProject.Application.Interface;
-using SalesProject.Domain.Interface;
-using SalesProject.Transversal.Common;
-using AutoMapper;
-using SalesProject.Domain.Entity.Models;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SalesProject.Application.DTO.customer.customer;
 using SalesProject.Application.DTO.pagination;
-using SalesProject.Domain.Entity.Models.pagination;
-using Microsoft.EntityFrameworkCore;
+using SalesProject.Application.Interface;
+using SalesProject.Domain.Entity.Models;
+using SalesProject.Domain.Interface;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Application.Main
 {
@@ -20,7 +19,7 @@ namespace SalesProject.Application.Main
             _customerDomain = customerDomain;
             _mapper = mapper;
         }
-
+        #region async methods
         public async Task<Response<bool>> InsertAsync(CustomerCreateDTO obj)
         {
             var response = new Response<bool>();
@@ -36,18 +35,18 @@ namespace SalesProject.Application.Main
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
+                response.Message = $"{ex.Message}";
             }
             return response;
         }
 
-        public async Task<Response<bool>> UpdateAsync(int id, CustomerUpdateDTO obj)
+        public async Task<Response<bool>> UpdateAsync(string code, CustomerUpdateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
                 var customer = _mapper.Map<Customer>(obj);
-                response.Data = await _customerDomain.UpdateAsync(id, customer);
+                response.Data = await _customerDomain.UpdateAsync(code, customer);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -60,12 +59,12 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> DeleteAsync(string code)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _customerDomain.DeleteAsync(id);
+                response.Data = await _customerDomain.DeleteAsync(code);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -133,12 +132,12 @@ namespace SalesProject.Application.Main
             return response;
         }
 
-        public async Task<Response<CustomerDTO>> GetByIdAsync(int id)
+        public async Task<Response<CustomerDTO>> GetByCodeAsync(string code)
         {
             var response = new Response<CustomerDTO>();
             try
             {
-                var customer = await _customerDomain.GetByIdAsync(id);
+                var customer = await _customerDomain.GetByCodeAsync(code);
                 response.Data = _mapper.Map<CustomerDTO>(customer);
                 response.IsSuccess = true;
                 response.Message = "Query successfully.";
@@ -166,7 +165,7 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+        #endregion
 
-        
     }
 }

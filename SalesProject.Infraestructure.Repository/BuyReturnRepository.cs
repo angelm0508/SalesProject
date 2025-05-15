@@ -6,9 +6,9 @@ namespace SalesProject.Infraestructure.Repository
 {
     public class BuyReturnRepository : IGenericRepository<BuyReturn>
     {
-        private readonly FerreteriaDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public BuyReturnRepository(FerreteriaDbContext context)
+        public BuyReturnRepository(ApiDbContext context)
         {
             _context = context;
         }
@@ -16,13 +16,30 @@ namespace SalesProject.Infraestructure.Repository
         #region async methods
         public async Task<bool> InsertAsync(BuyReturn obj)
         {
+            string dateTrans = obj.DateTrans.ToString("yyyy-MM-dd");
+            string date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            obj.DateTrans = DateTime.Parse(obj.DateTrans.ToString("yyyy-MM-dd"));
-            obj.Date = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            var returnSaleDet = BuildBuyDetailString(obj.BuyReturnDets);
 
-            var returnSaleIntoString = BuildBuyDetailString(obj.BuyReturnDets);
+            var insert = await _context.SPCRUDs
+                                        .FromSqlInterpolated(
+                                            $@"EXEC sp_insert_buy_return 
+                                            @supplierCode='{obj.SupplierCode}', 
+                                            @document_id={obj.DocumentId}, 
+                                            @userCode='{obj.UserCode}', 
+                                            @transStateId={obj.TransStateId}, 
+                                            @noDoc={obj.NoDoc},
+                                            @serie='{obj.Serie}',
+                                            @credit= {obj.Credit}, 
+                                            @dateTrans='{dateTrans}', 
+                                            @date= '{date}', 
+                                            @observation='{obj.Observation}', 
+                                            @subtotal={obj.SubTotal}, 
+                                            @iva={obj.Iva}, 
+                                            @total={obj.Total}, 
+                                            @detail='{returnSaleDet}'"
+                                        ).ToListAsync();
 
-            var insert = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_insert_buy_return @document_id={obj.DocumentId}, @supplierId={obj.SupplierId}, @userId={obj.UserId}, @transStateId={obj.TransStateId}, @noDoc={obj.NoDoc}, @serie={obj.Serie}, @credit={obj.Credit}, @dateTrans={obj.DateTrans},@date={obj.Date}, @observation={obj.Observation}, @subtotal={obj.Subtotal}, @iva={obj.Iva}, @total={obj.Total}, @detail={returnSaleIntoString}").ToListAsync();
 
             if (!string.IsNullOrEmpty(insert[0].ErrorMessage))
                 throw new Exception(insert[0].ErrorMessage);
@@ -31,39 +48,43 @@ namespace SalesProject.Infraestructure.Repository
         }
         public async Task<bool> UpdateAsync(int id, BuyReturn obj)
         {
-            obj.DateTrans = DateTime.Parse(obj.DateTrans.ToString("yyyy-MM-dd"));
+            #region new logic
+            var buyReturn = await _context.BuyReturns.SingleOrDefaultAsync(x => x.Id == id);
 
-            var buyReturnDet = BuildBuyDetailString(obj.BuyReturnDets);
+            buyReturn.DateTrans = obj.DateTrans;
+            buyReturn.Credit = obj.Credit;
+            buyReturn.Observation = obj.Observation;
 
-            var update = await _context.SPCRUDs.FromSqlInterpolated($"exec sp_update_buy_return @id={id}, @supplierId={obj.SupplierId}, @trans_state_id={obj.TransStateId}, @noDoc={obj.NoDoc}, @serie={obj.Serie}, @credit={obj.Credit}, @date_trans={obj.DateTrans}, @observation={obj.Observation}, @subtotal={obj.Subtotal}, @iva={obj.Iva}, @total={obj.Total}, @detail={buyReturnDet};").ToListAsync();
+            int updated = await _context.SaveChangesAsync();
 
-            if (!string.IsNullOrEmpty(update[0].ErrorMessage))
-                throw new Exception(update[0].ErrorMessage);
-
-            return true;
+            return updated > 0;
+            #endregion
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
-            var delete = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_delete_buy_return @id={id};").ToListAsync();
+            var canceled = await _context.SPCRUDs.FromSqlInterpolated($"EXEC sp_cancel_buy_return @id={id};").ToListAsync();
 
-            if (!string.IsNullOrEmpty(delete[0].ErrorMessage))
-                throw new Exception(delete[0].ErrorMessage);
+            if (!string.IsNullOrEmpty(canceled[0].ErrorMessage))
+                throw new Exception(canceled[0].ErrorMessage);
 
             return true;
         }
         public async Task<BuyReturn> GetByIdAsync(int id)
         {
-            var buy = await _context.BuyReturns.Include(x => x.Supplier)
-                                    .Include(x => x.Document)
-                                    .Include(x => x.BuyReturnDets)
-                                    .FirstOrDefaultAsync(x => x.Id == id);
-            return buy;
+            return await _context.BuyReturns.Include(x => x.TransState)
+                                            .Include(x => x.Document)
+                                            .Include(x => x.SupplierCodeNavigation)
+                                            .Include(x => x.UserCodeNavigation)
+                                            .Include(x => x.BuyReturnDets)
+                                            .FirstOrDefaultAsync(x => x.Id == id);
         }
         public async Task<IQueryable<BuyReturn>> GetAllAsync()
         {
-            IQueryable<BuyReturn> queryable = _context.BuyReturns.Include(x => x.Supplier)
-                                    .Include(x => x.Document).Include(x => x.BuyReturnDets);
-            return queryable;
+            return _context.BuyReturns.Include(x => x.TransState)
+                                        .Include(x => x.Document)
+                                        .Include(x => x.SupplierCodeNavigation)
+                                        .Include(x => x.UserCodeNavigation)
+                                        .Include(x => x.BuyReturnDets);
         }
         #endregion
 
@@ -73,9 +94,9 @@ namespace SalesProject.Infraestructure.Repository
             string detailIntoString = "";
             for (int i = 0; i < detail.Count(); i++)
             {
-                detailIntoString += $"{detail.ElementAt(i).BuyId}, {detail.ElementAt(i).ProductId}, {detail.ElementAt(i).CellarId}," +
+                detailIntoString += $"{detail.ElementAt(i).BuyId}, {detail.ElementAt(i).ProductSku}, {detail.ElementAt(i).Name}," +
                                 $"{detail.ElementAt(i).Price}, {detail.ElementAt(i).Units}, {detail.ElementAt(i).Discount}," +
-                                $"{detail.ElementAt(i).Subtotal}";
+                                $"{detail.ElementAt(i).SubTotal}, {detail.ElementAt(i).CellarCode}";
 
                 detailIntoString += ((detail.Count() > 1) && (i < detail.Count() - 1)) ? "|" : "";
             }
@@ -83,5 +104,6 @@ namespace SalesProject.Infraestructure.Repository
             return detailIntoString;
         }
         #endregion
+
     }
 }

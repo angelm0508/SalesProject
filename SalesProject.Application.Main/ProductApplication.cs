@@ -4,13 +4,12 @@ using SalesProject.Application.DTO.pagination;
 using SalesProject.Application.DTO.product.product;
 using SalesProject.Application.Interface;
 using SalesProject.Domain.Entity.Models;
-using SalesProject.Domain.Entity.Models.pagination;
 using SalesProject.Domain.Interface;
 using SalesProject.Transversal.Common;
 
 namespace SalesProject.Application.Main
 {
-    public class ProductApplication : IProductApplication
+    public class ProductApplication: IProductApplication
     {
         private readonly IProductDomain _productDomain;
         private readonly IMapper _mapper;
@@ -19,6 +18,8 @@ namespace SalesProject.Application.Main
             _productDomain = productDomain;
             _mapper = mapper;
         }
+
+
         #region async methods
         public async Task<Response<bool>> InsertAsync(ProductCreateDTO obj)
         {
@@ -35,17 +36,17 @@ namespace SalesProject.Application.Main
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
+                response.Message = $"{ex.Message} / {ex.InnerException}";
             }
             return response;
         }
-        public async Task<Response<bool>> UpdateAsync(int id, ProductUpdateDTO obj)
+        public async Task<Response<bool>> UpdateAsync(string sku, ProductUpdateDTO obj)
         {
             var response = new Response<bool>();
             try
             {
                 var product = _mapper.Map<Product>(obj);
-                response.Data = await _productDomain.UpdateAsync(id, product);
+                response.Data = await _productDomain.UpdateAsync(sku, product);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -58,12 +59,12 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<bool>> DeleteAsync(string sku)
         {
             var response = new Response<bool>();
             try
             {
-                response.Data = await _productDomain.DeleteAsync(id);
+                response.Data = await _productDomain.DeleteAsync(sku);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -76,38 +77,7 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<ProductDTO>> GetByIdAsync(int id)
-        {
-            var response = new Response<ProductDTO>();
-            try
-            {
-                var product = await _productDomain.GetByIdAsync(id);
-                response.Data = _mapper.Map<ProductDTO>(product);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
-        public async Task<Response<ProductDTO>> GetByNameAsync(string name)
-        {
-            var response = new Response<ProductDTO>();
-            try
-            {
-                var product = await _productDomain.GetByNameAsync(name);
-                response.Data = _mapper.Map<ProductDTO>(product);
-                response.IsSuccess = true;
-                response.Message = "Query successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return response;
-        }
+
         public async Task<Response<ProductDTO>> GetBySkuAsync(string sku)
         {
             var response = new Response<ProductDTO>();
@@ -124,13 +94,14 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
-        public async Task<Response<IEnumerable<ProductDTO>>> GetAllTthatContainsNameAsync(string name)
+
+        public async Task<Response<ProductDTO>> GetByNameAsync(string name)
         {
-            var response = new Response<IEnumerable<ProductDTO>>();
+            var response = new Response<ProductDTO>();
             try
             {
-                var product = await _productDomain.GetAllThatContainsNameAsync(name);
-                response.Data = _mapper.Map<IEnumerable<ProductDTO>>(product);
+                var product = await _productDomain.GetByNameAsync(name);
+                response.Data = _mapper.Map<ProductDTO>(product);
                 response.IsSuccess = true;
                 response.Message = "Query successfully.";
             }
@@ -140,6 +111,7 @@ namespace SalesProject.Application.Main
             }
             return response;
         }
+
         public async Task<Response<IEnumerable<ProductDTO>>> GetAllAsync()
         {
             var response = new Response<IEnumerable<ProductDTO>>();
@@ -179,6 +151,23 @@ namespace SalesProject.Application.Main
             return response;
         }
 
+        public async Task<Response<IEnumerable<ProductDTO>>> GetAllTthatContainsNameAsync(string name)
+        {
+            var response = new Response<IEnumerable<ProductDTO>>();
+            try
+            {
+                var product = await _productDomain.GetAllThatContainsNameAsync(name);
+                response.Data = _mapper.Map<IEnumerable<ProductDTO>>(product);
+                response.IsSuccess = true;
+                response.Message = "Query successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+        
         public async Task<Response<IEnumerable<ProductDTO>>> GetAllThatContainsSkuAsync(string sku)
         {
             var response = new Response<IEnumerable<ProductDTO>>();

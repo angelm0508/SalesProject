@@ -9,13 +9,13 @@ public partial class CellarTransfer
 
     public int DocumentId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserCode { get; set; }
 
-    public string NoTransfer { get; set; }
+    public string NoDoc { get; set; }
 
     public DateTime DateTrans { get; set; }
 
-    public DateTime? Date { get; set; }
+    public DateTime Date { get; set; }
 
     public string Observation { get; set; }
 
@@ -25,5 +25,5 @@ public partial class CellarTransfer
 
     public virtual ICollection<TransactionDetail> TransactionDetails { get; } = new List<TransactionDetail>();
 
-    public virtual UserSy User { get; set; }
+    public virtual UserSy UserCodeNavigation { get; set; }
 }

@@ -9,7 +9,7 @@ namespace SalesProject.Application.Interface
         #region async methods
         Task<Response<bool>> InsertAsync(SaleReturnCreateDTO obj);
         Task<Response<bool>> UpdateAsync(int id, SaleReturnUpdateDTO obj);
-        Task<Response<bool>> DeleteAsync(int id);
+        Task<Response<bool>> CancelAsync(int id);
         Task<Response<SaleReturnDTO>> GetByIdAsync(int id);
         Task<Response<IEnumerable<SaleReturnDTO>>> GetAllAsync();
         Task<Response<PagedList<SaleReturnDTO>>> GetAllWithPagingAsync(PaginationParametersDTO paginationParametersDTO);

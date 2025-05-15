@@ -1,18 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Infraestructure.Repository
 {
     public class SaleOrderRepository : IGenericRepository<SaleOrder>
     {
-        private readonly FerreteriaDbContext _context;
-        public SaleOrderRepository(FerreteriaDbContext context)
+        private readonly ApiDbContext _context;
+        public SaleOrderRepository(ApiDbContext context)
         {
             _context = context;
         }
@@ -23,115 +19,54 @@ namespace SalesProject.Infraestructure.Repository
             obj.DateTrans = DateTime.Parse(obj.DateTrans.ToString("yyyy-MM-dd"));
             obj.Date = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    await _context.SaleOrders.AddAsync(obj);
-                    await _context.SaveChangesAsync();
+            await _context.SaleOrders.AddAsync(obj);
+            int inserted = await _context.SaveChangesAsync();
 
-                    await transaction.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    throw ex;
-                }
-
-            }
-            return true;
+            return inserted > 0;
         }
         public async Task<bool> UpdateAsync(int id, SaleOrder obj)
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    // removing the current buy order detail...
-                    var saleOrderDet = await _context.SaleOrderDets.Where(x => x.SaleOrderId == id).ToListAsync();
+            var saleOrder = await _context.SaleOrders.SingleOrDefaultAsync(x => x.Id == id);
 
-                    _context.RemoveRange(saleOrderDet);
-                    await _context.SaveChangesAsync();
+            saleOrder.OutputDocumentId = obj.OutputDocumentId;
+            saleOrder.DateTrans = obj.DateTrans;
+            saleOrder.Credit = obj.Credit;
+            saleOrder.CreditDays = obj.CreditDays;
 
-                    // modifying the buy order cab
-                    var saleOrder = await _context.SaleOrders.FirstOrDefaultAsync(x => x.Id == id);
+            int updated = await _context.SaveChangesAsync();
 
-                    saleOrder.CustomerId = obj.CustomerId;
-                    saleOrder.TransStateId = obj.TransStateId;
-                    saleOrder.OutputDocumentId = obj.OutputDocumentId;
-
-                    saleOrder.NoDoc = obj.NoDoc;
-                    saleOrder.Serie = obj.Serie;
-                    saleOrder.Credit = obj.Credit;
-                    saleOrder.CreditDays = obj.CreditDays;
-                    saleOrder.DateTrans = obj.DateTrans;
-                    saleOrder.Iva = obj.Iva;
-                    saleOrder.Subtotal = obj.Subtotal;
-                    saleOrder.Total = obj.Total;
-
-                    // adding the new buy order detail
-                    saleOrder.SaleOrderDets = obj.SaleOrderDets;
-
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    throw ex;
-                }
-            }
-
-            return true;
+            return updated > 0;
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
+            var saleOrder = await _context.SaleOrders.SingleOrDefaultAsync(x => x.Id == id);
 
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    var saleOrderDetail = await _context.SaleOrderDets.Where(x => x.SaleOrderId == id).ToListAsync();
+            saleOrder.TransStateId = (int) Enumerators.TransactionStates.Cancelado;
 
-                    _context.SaleOrderDets.RemoveRange(saleOrderDetail);
-                    await _context.SaveChangesAsync();
+            int canceled = await _context.SaveChangesAsync();
 
-                    var saleOrder = await _context.SaleOrders.FirstOrDefaultAsync(x => x.Id == id);
-
-                    _context.SaleOrders.Remove(saleOrder);
-                    await _context.SaveChangesAsync();
-
-                    await transaction.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    throw ex;
-                }
-            }
-            return true;
+            return canceled > 0;
         }
         public async Task<SaleOrder> GetByIdAsync(int id)
         {
-            var saleOrder = await _context.SaleOrders.Include(x => x.Document)
-                                                .Include(x => x.Document)
-                                                .Include(x => x.User)
-                                                .Include(x => x.TransState)
-                                                .Include(x => x.OutputDocument)
-                                                .Include(x => x.SaleOrderDets)
-                                                .FirstOrDefaultAsync(x => x.Id == id);
-            return saleOrder;
+            return await _context.SaleOrders.Include(x => x.Document)
+                                            .Include(x => x.CustomerCodeNavigation)
+                                            .Include(x => x.UserCodeNavigation)
+                                            .Include(x => x.TransState)
+                                            .Include(x => x.OutputDocument)
+                                            .Include(x => x.SaleOrderDets)
+                                            .FirstOrDefaultAsync(x => x.Id == id);
         }
         public async Task<IQueryable<SaleOrder>> GetAllAsync()
         {
-            IQueryable<SaleOrder> queryable = _context.SaleOrders.Include(x => x.Document)
-                                                .Include(x => x.Customer)
-                                                .Include(x => x.User)
-                                                .Include(x => x.TransState)
-                                                .Include(x => x.OutputDocument)
-                                                .Include(x => x.SaleOrderDets);
-            return queryable;
+            return  _context.SaleOrders.Include(x => x.Document)
+                                        .Include(x => x.CustomerCodeNavigation)
+                                        .Include(x => x.UserCodeNavigation)
+                                        .Include(x => x.TransState)
+                                        .Include(x => x.OutputDocument)
+                                        .Include(x => x.SaleOrderDets);
         }
         #endregion
+
     }
 }

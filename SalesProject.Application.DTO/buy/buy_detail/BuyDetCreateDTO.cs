@@ -1,18 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SalesProject.Application.DTO.buy.buy_detail
 {
     public class BuyDetCreateDTO
     {
-        public int ProductId { get; set; }
-        public int CellarId { get; set; }
-        public decimal Price { get; set; }
-        public int Units { get; set; }
-        public decimal Discount { get; set; }
-        public decimal Subtotal { get; set; }
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public string ProductSku { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public string CellarCode { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double Price { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double Units { get; set; }
+        public double Discount { get; set; }
+
+        [Required(ErrorMessage = "{0} must not be empt.")]
+        public double Subtotal { get; set; }
     }
 }

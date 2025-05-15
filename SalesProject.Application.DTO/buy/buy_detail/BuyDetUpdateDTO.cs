@@ -8,11 +8,11 @@ namespace SalesProject.Application.DTO.buy.buy_detail
 {
     public class BuyDetUpdateDTO
     {
-        public int ProductId { get; set; }
-        public int CellarId { get; set; }
-        public decimal Price { get; set; }
+        public string ProductSku { get; set; }
+        public string CellarCode { get; set; }
+        public double Price { get; set; }
         public int Units { get; set; }
-        public decimal Discount { get; set; }
-        public decimal Subtotal { get; set; }
+        public double Discount { get; set; }
+        public double Subtotal { get; set; }
     }
 }

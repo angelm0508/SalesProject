@@ -9,14 +9,14 @@ namespace SalesProject.Application.Interface
     {
         #region async methods
         Task<Response<bool>> InsertAsync(SupplierCreateDTO obj);
-        Task<Response<bool>> UpdateAsync(int id, SupplierUpdateDTO obj);
-        Task<Response<bool>> DeleteAsync(int id);
-        Task<Response<SupplierDTO>> GetByIdAsync(int id);
+        Task<Response<bool>> UpdateAsync(string code, SupplierUpdateDTO obj);
+        Task<Response<bool>> DeleteAsync(string code);
+        Task<Response<SupplierDTO>> GetByCodeAsync(string code);
         Task<Response<SupplierDTO>> GetByNameAsync(string name);
-        Task<Response<IEnumerable<SupplierDTO>>> GetAllTthatContainsNameAsync(string name);
-        Task<Response<IEnumerable<SupplierDTO>>> GetAllTthatContainsNitAsync(string nit);
         Task<Response<IEnumerable<SupplierDTO>>> GetAllAsync();
         Task<Response<PagedList<SupplierDTO>>> GetAllWithPagingAsync(PaginationParametersDTO paginationParametersDTO);
+        Task<Response<IEnumerable<SupplierDTO>>> GetAllTthatContainsNameAsync(string name);
+        Task<Response<IEnumerable<SupplierDTO>>> GetAllTthatContainsNitAsync(string nit);
         #endregion
     }
 }

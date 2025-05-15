@@ -2,21 +2,18 @@
 using SalesProject.Domain.Entity.Models;
 using SalesProject.Domain.Interface;
 using SalesProject.Infraestructure.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SalesProject.Transversal.Common;
 
 namespace SalesProject.Domain.Core
 {
     public class SaleReturnDomain : ISaleReturnDomain
     {
+
         public readonly IGenericRepository<SaleReturn> _genericSaleReturnRepo;
-        public readonly IGenericRepository<Document> _genericDocumentRepo;
+        public readonly IGenericRepositoryThree<Document> _genericDocumentRepo;
 
         public SaleReturnDomain(IGenericRepository<SaleReturn> genericRepository, 
-            IGenericRepository<Document> genericDocumentRepo)
+            IGenericRepositoryThree<Document> genericDocumentRepo)
         {
             _genericSaleReturnRepo = genericRepository;
             _genericDocumentRepo = genericDocumentRepo;
@@ -38,13 +35,27 @@ namespace SalesProject.Domain.Core
 
             return await _genericSaleReturnRepo.InsertAsync(obj);
         }
-        public Task<bool> UpdateAsync(int id, SaleReturn obj)
+        public async Task<bool> UpdateAsync(int id, SaleReturn obj)
         {
-            return _genericSaleReturnRepo.UpdateAsync(id, obj);
+            if (await IsCanceled(id))
+            {
+                throw new Exception($"This sale return is already canceled.");
+            }
+            return await _genericSaleReturnRepo.UpdateAsync(id, obj);
         }
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> CancelAsync(int id)
         {
-            return _genericSaleReturnRepo.DeleteAsync(id);
+            if (await IsCanceled(id))
+            {
+                throw new Exception($"This sale return is already canceled.");
+            }
+
+            return await _genericSaleReturnRepo.CancelAsync(id);
+        }
+
+        public Task<SaleReturn> GetByIdAsync(int id)
+        {
+            return _genericSaleReturnRepo.GetByIdAsync(id);
         }
 
         public async Task<IQueryable<SaleReturn>> GetAllAsync()
@@ -53,15 +64,16 @@ namespace SalesProject.Domain.Core
             return queryable;
         }
 
-        public Task<SaleReturn> GetByIdAsync(int id)
+        public async Task<IQueryable<SaleReturn>> GetAllWithPagingAsync()
         {
-            return _genericSaleReturnRepo.GetByIdAsync(id);
+            return await _genericSaleReturnRepo.GetAllAsync();
         }
 
+        #region validations
         public async Task<bool> IsASaleReturnDocument(int id)
         {
             var document = await _genericDocumentRepo.GetByIdAsync(id);
-            return document.DocumentType.Description == "sale return";
+            return document.DocumentTypeId == (int) Enumerators.DocumentTypes.DevolucionVenta;
         }
 
         public async Task<bool> RegisterExists(SaleReturn obj)
@@ -71,9 +83,13 @@ namespace SalesProject.Domain.Core
                             && x.DocumentId == obj.DocumentId);
         }
 
-        public async Task<IQueryable<SaleReturn>> GetAllWithPagingAsync()
+        public async Task<bool> IsCanceled(int id)
         {
-            return await _genericSaleReturnRepo.GetAllAsync();
+            var saleReturn = await GetByIdAsync(id);
+
+            return saleReturn.TransStateId == (int) Enumerators.TransactionStates.Cancelado;
         }
+        #endregion
+
     }
 }

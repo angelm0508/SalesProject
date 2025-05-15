@@ -5,7 +5,9 @@ namespace SalesProject.Domain.Entity.Models;
 
 public partial class Customer
 {
-    public int Id { get; set; }
+    public string Code { get; set; }
+
+    public int CategoryId { get; set; }
 
     public string Nit { get; set; }
 
@@ -25,9 +27,7 @@ public partial class Customer
 
     public bool? Defaulter { get; set; }
 
-    public int CategoryId { get; set; }
-
-    public virtual CustomerCat Category { get; set; }
+    public virtual CustomerCategory Category { get; set; }
 
     public virtual ICollection<SaleOrder> SaleOrders { get; } = new List<SaleOrder>();
 
